@@ -1,0 +1,41 @@
+<div class="col-md-12">
+    <div class="card">
+        <div class="header">
+            <h4 class="title">APK Analysis</h4>
+            <p class="category">Detailed Results</p>
+        </div>
+        {% if 'dex' in results %}
+        <div class="content">
+            <p>Analyzed file is a DEX file, not an APK.</p>
+        </div>
+        {% else %}
+        <div class="content">
+            <label>Name</label>
+            <div class="labeled-content">{{results.name}}</div>
+            <label>Package</label>
+            <div class="labeled-content">{{results.package}}</div>
+            <label>Permissions</label>
+            <div class="labeled-content">
+            {% for permission in results.permissions %}
+                <div>{{permission}}</div>
+            {% endfor %}
+            </div>
+            <label>Receivers</label>
+            <div class="labeled-content">
+            {% for receiver in results.receivers %}
+                <div>{{receiver}}</div>
+            {% endfor %}
+            </div>
+            <label>Services</label>
+            <div class="labeled-content">
+            {% for service in results.services %}
+                <div>{{service}}</div>
+            {% endfor %}
+            </div>
+            <label>Main Activity</label>
+            <div class="labeled-content">{{results.main_activity}}</div>
+            <pre><code class="java">{{results.main_activity_content}}</code></pre>
+        </div>
+        {% endif %}
+    </div>
+</div>

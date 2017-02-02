@@ -1,0 +1,20 @@
+<div class="col-md-12">
+    <div class="card">
+        <div class="header">
+            <h4 class="title">Yara (memory)</h4>
+            <p class="category">Detailed Results</p>
+        </div>
+        <div class="content">
+            {% for match in results %}
+            <div class="row">
+            	<div class="col-sm-3">
+            		{{match.rule}} ({{match.owner}})
+            	</div>
+            	<div class="col-sm-9">
+            		<pre>{{match.hexdump}}</pre>
+            	</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

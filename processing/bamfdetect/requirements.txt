@@ -1,0 +1,6 @@
+pefile
+yara-python
+rarfile
+pycrypto
+pbkdf2
+--no-deps git+https://github.com/bwall/bamfdetect#egg=BAMF_Detect

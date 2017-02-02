@@ -1,0 +1,47 @@
+{% if results.analysis %}
+<div class="col-md-12">
+    <div class="card">
+        <div class="header">
+            <h4 class="title">Office Macros</h4>
+            <p class="category">Detailed Results</p>
+        </div>
+        <div class="content">
+                {% for keyword, description in results.analysis['AutoExec'] %}
+                    <div class="close-alert alert alert-danger">
+                        {{keyword}}: {{description}}
+                    </div>
+                {% endfor %}
+
+                {% for keyword, description in results.analysis['Suspicious'] %}
+                    <div class="close-alert alert alert-warning">
+                        {{keyword}}: {{description}}
+                    </div>
+                {% endfor %}
+
+                {% for type, value in results.analysis['IOC'] %}
+                    <div class="close-alert alert alert-warning">
+                        {{type}}: {{value}}
+                    </div>
+                {% endfor %}
+
+                {% for category in ['VBA string', 'Dridex string', 'Base64 String', 'Hex String'] %}
+                    {% for decoded, encoded in results.analysis[category] %}
+                        <div class="close-alert alert alert-info">
+                            {{category}}: {{encoded}} ({{decoded}})
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+
+                {% for string in results.analysis['Form String'] %}
+                    <div class="close-alert alert alert-info">
+                        Form String: {{string}})
+                    </div>
+                {% endfor %}
+
+            <label>Macros</label>
+
+            <pre><code>{{results.macros}}</code></pre>
+        </div>
+    </div>
+</div>
+{% endif %}

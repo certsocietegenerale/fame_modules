@@ -1,0 +1,37 @@
+<div class="col-md-12">
+    <div class="card">
+        <div class="header">
+            <h4 class="title">APK Verification</h4>
+            <p class="category">Detailed Results</p>
+        </div>
+        <div class="content">
+            {% if results.verification_result %}
+                <div class="close-alert alert alert-success">
+                    Verified APK was signed using the same certificate used in the Google Play Store.
+                </div>
+                <label>Certificate Details</label>
+                <pre><code>{{results.target_certificate}}</code></pre>
+            {% else %}
+                {% if not results.target_status %}
+                    <div class="close-alert alert alert-danger">
+                        Verified APK is not correctly signed.
+                    </div>
+                {% endif %}
+                {% if not results.ref_status %}
+                    <div class="close-alert alert alert-danger">
+                        Google Play Store APK is not correctly signed.
+                    </div>
+                {% endif %}
+                {% if results.target_certificate != results.ref_certificate %}
+                    <div class="close-alert alert alert-danger">
+                        Verified APK was NOT signed using the same certificate used in the Google Play Store.
+                    </div>
+                    <label>Verified APK Certificate Details</label>
+                    <pre><code>{{results.target_certificate}}</code></pre>
+                    <label>Google Play Store APK Certificate Details</label>
+                    <pre><code>{{results.ref_certificate}}</code></pre>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
