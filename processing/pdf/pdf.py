@@ -4,6 +4,7 @@ import uuid
 from subprocess import check_output, CalledProcessError
 
 from fame.core.module import ProcessingModule
+from fame.common.constants import VENDOR_ROOT
 
 
 class PDF(ProcessingModule):
@@ -11,18 +12,10 @@ class PDF(ProcessingModule):
     description = "Statically analyze PDFs with peepdf."
     acts_on = ["pdf"]
 
-    config = [
-        {
-            'name': 'peedpdf_path',
-            'type': 'str',
-            'default': 'peepdf.py',
-            'description': 'Path to the peepdf.py file, if not in PATH.'
-        }
-    ]
-
     def initialize(self):
         # Get a unique name for the commands file
         self.peepdf_commands = "/tmp/{}".format(str(uuid.uuid4()))
+        self.peepdf_path = os.path.join(VENDOR_ROOT, "peepdf", "peepdf.py")
 
     def each(self, target):
         self.results = {
