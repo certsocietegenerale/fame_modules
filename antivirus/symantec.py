@@ -62,8 +62,8 @@ class Symantec(AntivirusModule):
                 'fname': self.first_name,
                 'lname': self.last_name,
                 'cname': self.company,
-                'email': self.email,
-                'email2': self.email,
+                'email': self.email_address,
+                'email2': self.email_address,
                 'pin': self.support_id,
                 'stype': "upfile",
                 'comments': None
