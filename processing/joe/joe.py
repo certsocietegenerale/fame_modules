@@ -36,14 +36,9 @@ class Joe(ProcessingModule):
 
     config = [
         {
-            'name': 'username',
+            'name': 'apikey',
             'type': 'str',
-            'description': 'Username to use to connect to the API.'
-        },
-        {
-            'name': 'password',
-            'type': 'str',
-            'description': 'Password to use to connect to the API.'
+            'description': 'API Key to use to connect to your account.'
         },
         {
             'name': 'base_url',
@@ -61,12 +56,13 @@ class Joe(ProcessingModule):
             'name': 'wait_timeout',
             'type': 'integer',
             'default': 5400,
-            'description': 'Time in seconds that the module will wait for cuckoo analysis to be over.'
+            'description': "Time in seconds that the module will wait for joe's analysis to be over."
         },
         {
             'name': 'wait_step',
             'type': 'integer',
-            'description': "Time in seconds between two check of cuckoo's analysis status"
+            'default': 30,
+            'description': "Time in seconds between two check of joe's analysis status"
         },
         {
             'name': 'allow_internet_access',
@@ -93,8 +89,7 @@ class Joe(ProcessingModule):
     def each_with_type(self, target, file_type):
         # Define base params
         self.joe_params = {
-            'username': self.username,
-            'password': self.password,
+            'apikey': self.apikey,
             'tandc': "1"
         }
 
@@ -120,20 +115,20 @@ class Joe(ProcessingModule):
     def submit_file(self, target, file_type):
         url = self.base_url + 'analysis'
 
-        if self.option_enabled('allow_internet_access'):
+        if self.allow_internet_access:
             inet = "1"
         else:
             inet = "0"
 
         params = {
-            'username': (None, self.username),
-            'password': (None, self.password),
+            'apikey': (None, self.apikey),
             'tandc': (None, "1"),
             'type': (None, "file"),
             'auto': (None, "1"),
             'inet': (None, inet),
             'ssl': (None, inet),
             'scae': (None, "1"),
+            'vbainstr': (None, "1"),
             'comments': (None, 'Submitted via FAME'),
         }
 
