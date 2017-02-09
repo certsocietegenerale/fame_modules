@@ -120,13 +120,13 @@ class CuckooModified(ProcessingModule):
         return True
 
     def define_options(self):
-        if self.option_enabled('allow_internet_access'):
+        if self.allow_internet_access:
             tag = "internet_access"
         else:
             tag = "no_internet"
 
         return {
-            'timeout': self.option_value('analysis_time'),
+            'timeout': self.analysis_time,
             'enforce_timeout': True,
             'tags': tag
         }
