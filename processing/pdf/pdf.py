@@ -1,10 +1,10 @@
 import os
 import json
-import uuid
 from subprocess import check_output, CalledProcessError
 
 from fame.core.module import ProcessingModule
 from fame.common.constants import VENDOR_ROOT
+from fame.common.utils import tempdir
 
 
 class PDF(ProcessingModule):
@@ -14,7 +14,7 @@ class PDF(ProcessingModule):
 
     def initialize(self):
         # Get a unique name for the commands file
-        self.peepdf_commands = "/tmp/{}".format(str(uuid.uuid4()))
+        self.peepdf_commands = os.path.join(tempdir(), 'peepdf_commands.txt')
         self.peepdf_path = os.path.join(VENDOR_ROOT, "peepdf", "peepdf.py")
 
     def each(self, target):
@@ -29,11 +29,18 @@ class PDF(ProcessingModule):
         analysis = json.loads(analysis)['peepdf_analysis']['advanced'][0]['version_info']
 
         # List every suspicious object
-        for object_type in ['actions', 'elements', 'triggers']:
+        for object_type in ['actions', 'triggers']:
             if analysis['suspicious_elements'][object_type]:
                 for element in analysis['suspicious_elements'][object_type]:
                     self.results['suspicious_objects'].append((element, analysis['suspicious_elements'][object_type][element]))
                     self.fetch_objects(target, analysis['suspicious_elements'][object_type][element])
+
+        for element in analysis['suspicious_elements']['elements']:
+            if element['vuln_cve_list']:
+                self.results['exploits'].append(element)
+            else:
+                self.results['suspicious_objects'].append((element['name'], element['objects']))
+            self.fetch_objects(target, element['objects'])
 
         # See if we have objects with JS
         if analysis['js_objects']:
@@ -62,7 +69,7 @@ class PDF(ProcessingModule):
 
     def peepdf(self, *args):
         try:
-            return check_output([self.peepdf_path] + list(args))
+            return check_output(["python", self.peepdf_path] + list(args))
         except CalledProcessError, e:
             if e.output:
                 return e.output
