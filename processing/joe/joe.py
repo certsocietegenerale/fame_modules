@@ -205,7 +205,7 @@ class Joe(ProcessingModule):
                 fd.seek(0, 0)
                 self.extract_graph(fd)
 
-            self.results['report'] = self.add_support_file(filepath)
+            self.add_support_file('Report', filepath)
 
     def get_unpacked_executables(self):
         url = self.base_url + 'analysis/download'

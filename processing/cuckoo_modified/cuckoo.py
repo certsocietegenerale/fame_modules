@@ -165,7 +165,7 @@ class CuckooModified(ProcessingModule):
         url = self.web_base_url + '/filereport/{}/htmlsummary/'.format(self.task_id)
         tmpdir = tempdir()
         filepath = urlretrieve(url, os.path.join(tmpdir, 'cuckoo_report.html'))[0]
-        self.results['report'] = self.add_support_file(filepath)
+        self.add_support_file('Report', filepath)
 
     def process_report(self):
         url = self.web_base_url + '/api/tasks/get/iocs/{0}'.format(self.task_id)

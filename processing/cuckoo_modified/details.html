@@ -36,7 +36,7 @@
                         {% if current_user.has_permission('cuckoo_access') %}
                             <li><a href="{{results.URL}}" target="_blank"><i class="pe-7s-link"></i> View Report</a></li>
                         {% endif %}
-                        <li><a href="{{results.report}}" target="_blank"><i class="pe-7s-link"></i> Download Report</a></li>
+                        {{support_files(name)}}
                     </ul>
                 </div>
             </div>
