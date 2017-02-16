@@ -1,13 +1,13 @@
 import os
 import re
 import time
-import tempfile
 import mimetypes
 from zipfile import ZipFile
 from shutil import copyfileobj
 from urllib import urlopen, urlencode
 
 from fame.core.module import ProcessingModule
+from fame.common.utils import tempdir
 from fame.common.exceptions import ModuleInitializationError, ModuleExecutionError
 
 try:
@@ -198,7 +198,7 @@ class Joe(ProcessingModule):
         if response.getcode() != 200:
             self.log('error', 'could not find report for task id {}: {}'.format(self.joe_params['webid'], response.read()))
         else:
-            tmpdir = tempfile.mkdtemp()
+            tmpdir = tempdir()
             filepath = os.path.join(tmpdir, 'joe_report.html')
             with open(filepath, 'w+b') as fd:
                 copyfileobj(response, fd)
@@ -219,7 +219,7 @@ class Joe(ProcessingModule):
         if response.getcode() != 200:
             self.log('error', 'could not find unpacked PEs for task id {}: {}'.format(self.joe_params['webid'], response.read()))
         else:
-            tmpdir = tempfile.mkdtemp()
+            tmpdir = tempdir()
             filepath = os.path.join(tmpdir, 'unpacked.zip')
             with open(filepath, 'w+b') as fd:
                 copyfileobj(response, fd)

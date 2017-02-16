@@ -1,9 +1,9 @@
 import os
 import requests
-import tempfile
 from cgi import parse_header
 
 from fame.core.module import ProcessingModule
+from fame.common.utils import tempdir
 from fame.common.exceptions import ModuleExecutionError
 
 
@@ -20,7 +20,7 @@ class URLDownload(ProcessingModule):
         response = requests.get(target, stream=True)
 
         if response.status_code == 200:
-            tmpdir = tempfile.mkdtemp()
+            tmpdir = tempdir()
             try:
                 filename = parse_header(response.headers['content-disposition'])[1]['filename']
             except KeyError:

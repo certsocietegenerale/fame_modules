@@ -1,7 +1,8 @@
 import os
 from zipfile import ZipFile
-from tempfile import mkdtemp
+
 from fame.core.module import ProcessingModule
+from fame.common.utils import tempdir
 
 
 class Zip(ProcessingModule):
@@ -10,18 +11,18 @@ class Zip(ProcessingModule):
     acts_on = "zip"
 
     def each(self, target):
-        tempdir = mkdtemp()
+        tmpdir = tempdir()
 
         zf = ZipFile(target)
         for name in zf.namelist():
             try:
-                filepath = zf.extract(name, tempdir)
+                filepath = zf.extract(name, tmpdir)
                 if os.path.isfile(filepath):
                     self.add_extracted_file(filepath)
             except RuntimeError:
                 for password in ['virus', 'infected']:
                     try:
-                        filepath = zf.extract(name, tempdir, pwd=password)
+                        filepath = zf.extract(name, tmpdir, pwd=password)
                         if os.path.isfile(filepath):
                             self.add_extracted_file(filepath)
                         break

@@ -1,6 +1,6 @@
-from tempfile import NamedTemporaryFile
+import os
 
-from fame.common.utils import list_value
+from fame.common.utils import list_value, tempdir
 from ..vol import Volatility
 
 
@@ -33,11 +33,13 @@ class MemYara(Volatility):
         matched = False
 
         # Create file containing rules
-        rules = NamedTemporaryFile()
+        tmpdir = tempdir()
+        rules_path = os.path.join(tmpdir, 'rules')
+        rules = open(rules_path, 'wb')
         rules.write(self.rules)
-        rules.flush()
+        rules.close()
 
-        self._volconfig.update("YARA_FILE", rules.name)
+        self._volconfig.update("YARA_FILE", rules_path)
         plugin = self.plugins["yarascan"](self._volconfig)
 
         # code mostly taken from cuckoo
@@ -63,7 +65,5 @@ class MemYara(Volatility):
                 self.results.append(new)
                 self.add_tag(hit.rule)
                 matched = True
-
-        rules.close()
 
         return matched

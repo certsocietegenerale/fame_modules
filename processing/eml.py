@@ -1,8 +1,9 @@
-from fame.core.module import ProcessingModule
 import os
 import email.utils
 import mimetypes
-import tempfile
+
+from fame.core.module import ProcessingModule
+from fame.common.utils import tempdir
 
 
 class eml(ProcessingModule):
@@ -15,7 +16,7 @@ class eml(ProcessingModule):
         msg = email.message_from_file(fp)
 
         fp.close()
-        path_temp = tempfile.mkdtemp()
+        path_temp = tempdir()
         counter = 1
         for part in msg.walk():
             # multipart/* are just containers

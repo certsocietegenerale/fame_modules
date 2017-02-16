@@ -1,7 +1,6 @@
 import os
 import time
 import zipfile
-import tempfile
 from urllib import urlopen, urlretrieve
 
 try:
@@ -16,6 +15,7 @@ try:
 except ImportError:
     HAVE_IJSON = False
 
+from fame.common.utils import tempdir
 from fame.common.exceptions import ModuleInitializationError, ModuleExecutionError
 from fame.core.module import ProcessingModule
 
@@ -163,7 +163,7 @@ class CuckooModified(ProcessingModule):
 
     def store_report_summary(self):
         url = self.web_base_url + '/filereport/{}/htmlsummary/'.format(self.task_id)
-        tmpdir = tempfile.mkdtemp()
+        tmpdir = tempdir()
         filepath = urlretrieve(url, os.path.join(tmpdir, 'cuckoo_report.html'))[0]
         self.results['report'] = self.add_support_file(filepath)
 
@@ -225,12 +225,12 @@ class CuckooModified(ProcessingModule):
         if response.status_code != 200:
             self.log('error', 'could not find {0} for task id {1}'.format(type, self.task_id))
         else:
+            tmpdir = tempdir()
             if zipped:
-                tmpdir = tempfile.mkdtemp()
                 f = open(os.path.join(tmpdir, 'zip'), 'a+b')
             else:
-                (fd, filename) = tempfile.mkstemp()
-                f = os.fdopen(fd, "wb")
+                filename = os.path.join(tmpdir, 'cuckoo_response')
+                f = open(filename, "wb")
 
             for chunk in response.iter_content(1024):
                 f.write(chunk)

@@ -1,9 +1,9 @@
 from os import path
-from tempfile import mkdtemp
 from zipfile import ZipFile
 from subprocess import Popen, PIPE
 from fame.core.module import ProcessingModule
 from fame.common.exceptions import ModuleInitializationError
+from fame.common.utils import tempdir
 
 
 try:
@@ -85,7 +85,7 @@ class APKVerification(ProcessingModule):
         return ref_path
 
     def each(self, target):
-        self.tmpdir = mkdtemp()
+        self.tmpdir = tempdir()
         self.results = dict()
 
         apk, vm, vm_analysis = AnalyzeAPK(target)
