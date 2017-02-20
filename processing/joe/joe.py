@@ -2,7 +2,7 @@ import os
 import re
 import time
 import mimetypes
-from zipfile import ZipFile
+from zipfile import ZipFile, BadZipfile
 from shutil import copyfileobj
 from urllib import urlopen, urlencode
 
@@ -224,12 +224,15 @@ class Joe(ProcessingModule):
             with open(filepath, 'w+b') as fd:
                 copyfileobj(response, fd)
 
-            unpacked_files = []
-            zf = ZipFile(filepath)
-            for name in zf.namelist():
-                unpacked_files.append(zf.extract(name, tmpdir, pwd='infected'))
+            try:
+                unpacked_files = []
+                zf = ZipFile(filepath)
+                for name in zf.namelist():
+                    unpacked_files.append(zf.extract(name, tmpdir, pwd='infected'))
 
-            self.register_files('unpacked_executable', unpacked_files)
+                self.register_files('unpacked_executable', unpacked_files)
+            except BadZipfile:
+                pass
 
     def extract_iocs(self, report):
         iocs = set()
