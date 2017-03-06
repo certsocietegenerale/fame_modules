@@ -234,6 +234,11 @@ class Joe(ProcessingModule):
             except BadZipfile:
                 pass
 
+    def extract_url(self, scheme, iocs, request):
+        match = re.match(r'(GET|POST) (\S+) .*Host: (\S+)', request, re.DOTALL)
+        if match:
+            iocs.add("{}://{}{}".format(scheme, match.group(3), match.group(2)))
+
     def extract_iocs(self, report):
         iocs = set()
         parser = ijson.parse(report)
@@ -249,14 +254,21 @@ class Joe(ProcessingModule):
             ]:
                 if not value.startswith("192.168."):
                     iocs.add(value)
-            elif prefix == "analysis.behavior.network.http.packet.item.header":
+            elif prefix in [
+                "analysis.behavior.network.http.packet.item.header",
+                "analysis.behavior.network.https.packet.item.header",
+                "analysis.behavior.network.sslhttp.packet.item.header",
+            ]:
                 lines = ""
             elif prefix == "analysis.behavior.network.http.packet.item.header.line.item":
                 lines += "{}\n".format(value)
-
-                match = re.match(r'(GET|POST) (\S+) .*Host: (\S+)', lines, re.DOTALL)
-                if match:
-                    iocs.add("http://{}{}".format(match.group(3), match.group(2)))
+                self.extract_url("http", iocs, lines)
+            elif prefix in [
+                "analysis.behavior.network.https.packet.item.header.line.item",
+                "analysis.behavior.network.sslhttp.packet.item.header.line.item"
+            ]:
+                lines += "{}\n".format(value)
+                self.extract_url("https", iocs, lines)
 
         for ioc in iocs:
             self.add_ioc(ioc)
