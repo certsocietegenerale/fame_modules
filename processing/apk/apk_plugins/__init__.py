@@ -10,7 +10,7 @@ __all__ = [os.path.basename(f)[:-3] for f in modules] + ['APKPlugin']
 class APKPlugin(object):
     """Base class for plugins that try to perform extractions with Androguard
 
-    All plugins that inherits from this class and are located in the same
+    All plugins that inherit from this class and are located in the same
     directory (`fame/modules/processing/apk_plugins`) will automatically be
     executed by the `apk` processing module.
 
