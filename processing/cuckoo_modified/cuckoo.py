@@ -23,7 +23,7 @@ from fame.core.module import ProcessingModule
 class CuckooModified(ProcessingModule):
     name = "cuckoo_modified"
     description = "Submit the file to Cuckoo Sandbox (cuckoo-modified version)."
-    acts_on = ["executable", "word", "html", "rtf", "excel", "pdf", "javascript", "jar", "url", "powerpoint2"]
+    acts_on = ["executable", "word", "html", "rtf", "excel", "pdf", "javascript", "jar", "url", "powerpoint", "vbs"]
     generates = ["memory_dump", "pcap"]
 
     config = [
