@@ -48,6 +48,15 @@
             {% if not results.exploits and not results.suspicious_objects and not results.objects_content %}
             <p>No suspicious object found</p>
             {% endif %}
+
+            {% if results.links %}
+                <label>Extracted Links</label>
+                <div class="labeled-content">
+                {% for url in results.links %}
+                    <div>{{url}}</div>
+                {% endfor %}
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
