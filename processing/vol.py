@@ -61,6 +61,7 @@ class Volatility(ProcessingModule):
                 {
                     'name': 'plugins',
                     'type': 'str',
+                    'default': None,
                     'description': 'Path of additional volatility plugins'
                 },
                 {
