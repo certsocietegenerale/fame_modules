@@ -1,1 +1,3 @@
 androguard
+yara-python
+pyelftools
