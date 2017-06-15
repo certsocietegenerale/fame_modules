@@ -1,6 +1,8 @@
+import os
+import hashlib
 from fame.core.module import ProcessingModule
 from fame.common.exceptions import ModuleInitializationError
-
+from fame.common.utils import tempdir
 
 try:
     from oletools import olevba
@@ -23,6 +25,8 @@ class OfficeMacros(ProcessingModule):
         if not HAVE_OLETOOLS:
             raise ModuleInitializationError(self, "Missing dependency: oletools")
 
+        self.tmpdir = tempdir()
+
     def each(self, target):
         self.results = {
             'macros': u'',
@@ -44,8 +48,17 @@ class OfficeMacros(ProcessingModule):
         analysis = vba.analyze_macros(show_decoded_strings=True)
 
         # extract all macros code
+        havemacros = False
         for (_, _, _, vba_code) in vba.extract_all_macros():
             self.results['macros'] += vba_code.decode('utf-8', errors='replace') + '\n'
+            havemacros = True
+
+        if havemacros:
+            mname = hashlib.sha256(self.results['macros']).hexdigest()
+            newfile = "%s/macros_%s.vba" % (self.tmpdir,mname)
+            with open(newfile,'wb') as f:
+                f.write(self.results['macros'])
+            self.add_extracted_file(newfile)
 
         # extract all form strings
         for (_, _, form_string) in vba.extract_form_strings():
