@@ -54,10 +54,11 @@ class OfficeMacros(ProcessingModule):
             hasmacros = True
 
         if hasmacros:
-            mname = hashlib.sha256(self.results['macros']).hexdigest()
+            mcontent = bytes(self.results['macros'].encode('utf-8'))
+            mname = hashlib.sha256(mcontent).hexdigest()
             newfile = "%s/macros_%s.vba" % (self.tmpdir,mname)
             with open(newfile,'wb') as f:
-                f.write(self.results['macros'])
+                f.write(mcontent)
             self.add_extracted_file(newfile)
 
         # extract all form strings
