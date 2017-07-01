@@ -17,7 +17,10 @@ class URLDownload(ProcessingModule):
     triggered_by = "!"
 
     def each(self, target):
-        response = requests.get(target, stream=True)
+        try:
+            response = requests.get(target, stream=True)
+        except requests.exceptions.RequestException, e:
+            raise ModuleExecutionError("Could not download file. Status: {}".format(e))
 
         if response.status_code == 200:
             tmpdir = tempdir()
