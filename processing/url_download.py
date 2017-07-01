@@ -28,6 +28,9 @@ class URLDownload(ProcessingModule):
 
             filepath = os.path.join(tmpdir, filename)
 
+            if os.path.isdir(filepath):
+                raise ModuleExecutionError("Could not download file. Status: File not found.")
+
             with open(filepath, 'wb') as fd:
                 for chunk in response.iter_content(1024):
                     fd.write(chunk)
