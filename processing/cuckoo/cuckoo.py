@@ -97,7 +97,7 @@ class Cuckoo(ProcessingModule):
         self.process_report()
 
         # Get back memory dump
-        self.get_memory_dump()
+        # self.get_memory_dump()
 
         # Add report URL to results
         self.results['URL'] = urljoin(self.web_endpoint, "/analysis/{}/summary/".format(self.task_id))
