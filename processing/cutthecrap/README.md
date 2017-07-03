@@ -12,4 +12,6 @@ In order to create this virtual machine, you have to follow the process describe
 * Install the Office suite. The best results will be with Microsoft Office 2010 in english. Make sure to disable security and enable macros by default.
 * Install dependencies:
 
-    > pip install winappdbg pywin32
+    > pip install winappdbg pypiwin32
+
+Note that you should use Python 32bits on this VM for cutthecrap to work as intended.
