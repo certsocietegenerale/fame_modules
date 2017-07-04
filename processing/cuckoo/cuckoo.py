@@ -179,7 +179,10 @@ class Cuckoo(ProcessingModule):
 
     def get_memory_dump(self):
         url = urljoin(self.web_endpoint, '/full_memory/{0}/'.format(self.task_id))
-        response = requests.get(url, stream=True)
+        try:
+            response = requests.get(url, stream=True)
+        except requests.exceptions.RequestException, e:
+            return False
 
         self.register_response_as('memory_dump', response)
 

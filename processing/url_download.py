@@ -17,7 +17,10 @@ class URLDownload(ProcessingModule):
     triggered_by = "!"
 
     def each(self, target):
-        response = requests.get(target, stream=True)
+        try:
+            response = requests.get(target, stream=True)
+        except requests.exceptions.RequestException, e:
+            raise ModuleExecutionError("Could not download file. Status: {}".format(e))
 
         if response.status_code == 200:
             tmpdir = tempdir()
@@ -27,6 +30,9 @@ class URLDownload(ProcessingModule):
                 filename = target.split('/')[-1]
 
             filepath = os.path.join(tmpdir, filename)
+
+            if os.path.isdir(filepath):
+                raise ModuleExecutionError("Could not download file. Status: File not found.")
 
             with open(filepath, 'wb') as fd:
                 for chunk in response.iter_content(1024):
