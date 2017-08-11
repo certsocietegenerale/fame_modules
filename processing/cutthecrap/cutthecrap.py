@@ -140,6 +140,18 @@ class CutTheCrap(IsolatedProcessingModule, EventHandler):
             'default': 0x275D6BD6,
             'description': 'Address of the function vulnerable to CVE-2012-0158.'
         },
+        {
+            'name': 'add_to_support_files',
+            'type': 'bool',
+            'default': False,
+            'description': 'Adds the dropped files to support files (so that they can be downloaded).',
+        },
+        {
+            'name': 'add_to_extracted_files',
+            'type': 'bool',
+            'default': True,
+            'description': 'Adds the dropped files to extracted files (they will have their own analysis).',
+        }
     ]
 
     def initialize(self):
@@ -176,6 +188,7 @@ class CutTheCrap(IsolatedProcessingModule, EventHandler):
         self.results = {
             "urls": set(),
             "processes": set(),
+            "files": set(),
             "exploits": set()
         }
 
@@ -222,19 +235,23 @@ class CutTheCrap(IsolatedProcessingModule, EventHandler):
         monkey.stop()
         monkey.join()
 
-        print self.results['urls']
-        print self.results['processes']
-        print self.results['exploits']
-
         self.results['urls'] = list(self.results['urls'])
         self.results['processes'] = list(self.results['processes'])
         self.results['exploits'] = list(self.results['exploits'])
+        self.results['files'] = list(self.results['files'])
+
+        for i, dropped_file in enumerate(self.results['files']):
+            if self.add_to_support_files:
+                basename = dropped_file.split('\\')[-1].split('/')[-1]
+                self.add_support_file("{}_{}".format(i, basename), dropped_file)
+            if self.add_to_extracted_files:
+                self.add_extracted_file(dropped_file)
 
         # Restore the VM if we did not catch a process creation
         if len(self.results['processes']) == 0:
             self.should_restore = True
 
-        return bool(self.results['urls'] or self.results['processes'] or self.results['exploits'])
+        return bool(self.results['urls'] or self.results['processes'] or self.results['exploits'] or self.results['files'])
 
     def load_dll(self, event):
 
@@ -249,6 +266,11 @@ class CutTheCrap(IsolatedProcessingModule, EventHandler):
 
             address = module.resolve("WinExec")
             event.debug.break_at(pid, address, self.bp_WinExec)
+
+            address = module.resolve("CreateFileA")
+            event.debug.break_at(pid, address, self.bp_CreateFileA)
+            address = module.resolve("CreateFileW")
+            event.debug.break_at(pid, address, self.bp_CreateFileW)
 
         if module.match_name("mscomctl.ocx"):
             address = self.mscomctl_cve_2012_0158_addr
@@ -303,6 +325,26 @@ class CutTheCrap(IsolatedProcessingModule, EventHandler):
 
     def bp_CreateProcessA(self, event):
         return self.bp_CreateProcess(event, False)
+
+    def bp_CreateFile(self, event, fUnicode=True):
+        proc = event.get_process()
+        thread = event.get_thread()
+        lpFileName, dwDesiredAccess = thread.read_stack_dwords(3)[1:]
+
+        filename = proc.peek_string(lpFileName, fUnicode=fUnicode)
+
+        if dwDesiredAccess & 0x40000000:
+            stack_trace = thread.get_stack_trace()
+            for fcall in stack_trace:
+                if fcall[2].endswith('scrrun.dll'):
+                    self.results['files'].add(filename)
+                    break
+
+    def bp_CreateFileW(self, event):
+        return self.bp_CreateFile(event)
+
+    def bp_CreateFileA(self, event):
+        return self.bp_CreateFile(event, False)
 
     def bp_InternetCrackUrl(self, event, fUnicode=True):
         proc = event.get_process()
