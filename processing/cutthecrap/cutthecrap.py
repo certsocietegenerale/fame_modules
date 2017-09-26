@@ -185,11 +185,9 @@ class CutTheCrap(IsolatedProcessingModule, EventHandler):
             'javascript': 'C:\\Windows\\system32\\wscript.exe'
         }
 
+        self.files = set()
         self.results = {
-            "urls": set(),
-            "processes": set(),
-            "files": set(),
-            "exploits": set()
+            "actions": []
         }
 
         monkey = ClickThread()
@@ -235,23 +233,19 @@ class CutTheCrap(IsolatedProcessingModule, EventHandler):
         monkey.stop()
         monkey.join()
 
-        self.results['urls'] = list(self.results['urls'])
-        self.results['processes'] = list(self.results['processes'])
-        self.results['exploits'] = list(self.results['exploits'])
-        self.results['files'] = list(self.results['files'])
-
-        for i, dropped_file in enumerate(self.results['files']):
+        for i, dropped_file in enumerate(self.files):
             if self.add_to_support_files:
                 basename = dropped_file.split('\\')[-1].split('/')[-1]
                 self.add_support_file("{}_{}".format(i, basename), dropped_file)
             if self.add_to_extracted_files:
                 self.add_extracted_file(dropped_file)
+        del self.files
 
         # Restore the VM if we did not catch a process creation
         if len(self.results['processes']) == 0:
             self.should_restore = True
 
-        return bool(self.results['urls'] or self.results['processes'] or self.results['exploits'] or self.results['files'])
+        return len(self.results['actions']) > 0
 
     def load_dll(self, event):
 
@@ -291,7 +285,7 @@ class CutTheCrap(IsolatedProcessingModule, EventHandler):
         _, _, _, size = thread.read_stack_dwords(4)
 
         if size > 12:
-            self.results['exploits'].add("CVE-2012-0158")
+            self.record_exploit('CVE-2012-0158')
 
     def bp_WinExec(self, event):
         proc = event.get_process()
@@ -300,7 +294,7 @@ class CutTheCrap(IsolatedProcessingModule, EventHandler):
         lpCmdLine = thread.read_stack_dwords(2)[1]
         cmdline = proc.peek_string(lpCmdLine)
 
-        self.results['processes'].add(cmdline)
+        self.record_exec(cmdline, 'WinExec')
 
         Process(event.get_pid()).kill()
 
@@ -314,9 +308,9 @@ class CutTheCrap(IsolatedProcessingModule, EventHandler):
 
         if "splwow64" not in application:
             if cmdline != "":
-                self.results['processes'].add(cmdline)
+                self.record_exec(cmdline, 'CreateProcess')
             else:
-                self.results['processes'].add(application)
+                self.record_exec(application, 'CreateProcess')
 
             Process(event.get_pid()).kill()
 
@@ -336,9 +330,11 @@ class CutTheCrap(IsolatedProcessingModule, EventHandler):
         if dwDesiredAccess & 0x40000000:
             stack_trace = thread.get_stack_trace()
             for fcall in stack_trace:
-                if fcall[2].endswith('scrrun.dll'):
-                    self.results['files'].add(filename)
+                if fcall[2].split('\\')[-1] in ['scrrun.dll', 'msado15.dll']:
+                    self.record_file(filename, 'CreateFile')
                     break
+            else:
+                self.log('debug', 'ignoring file {}'.format(filename))
 
     def bp_CreateFileW(self, event):
         return self.bp_CreateFile(event)
@@ -352,7 +348,7 @@ class CutTheCrap(IsolatedProcessingModule, EventHandler):
         lpszUrl = thread.read_stack_dwords(2)[1]
 
         url = proc.peek_string(lpszUrl, fUnicode=fUnicode)
-        self.results['urls'].add(url)
+        self.record_http(url, 'InternetCrackUrl')
         self.add_ioc(url, ['payload_delivery'])
 
     def bp_InternetCrackUrlW(self, event):
@@ -363,3 +359,19 @@ class CutTheCrap(IsolatedProcessingModule, EventHandler):
 
     def bp_WinHttpCrackUrl(self, event):
         return self.bp_InternetCrackUrl(event)
+
+    def record(self, action, params, comment):
+        self.results['actions'].append((action, params, comment))
+
+    def record_http(self, params, comment):
+        self.record('HTTP Request', params, comment)
+
+    def record_exploit(self, cve):
+        self.record('Triggered Exploit', '', cve)
+
+    def record_exec(self, params, comment):
+        self.record('Executed Command', params, comment)
+
+    def record_file(self, params, comment):
+        self.files.add(params)
+        self.record('Modified File', params, comment)
