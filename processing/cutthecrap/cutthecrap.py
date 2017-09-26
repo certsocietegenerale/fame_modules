@@ -242,7 +242,7 @@ class CutTheCrap(IsolatedProcessingModule, EventHandler):
         del self.files
 
         # Restore the VM if we did not catch a process creation
-        if len(self.results['processes']) == 0:
+        if len(self.results['actions']) == 0:
             self.should_restore = True
 
         return len(self.results['actions']) > 0
