@@ -125,7 +125,7 @@ class ClickThread(threading.Thread):
 class CutTheCrap(IsolatedProcessingModule, EventHandler):
     name = "cutthecrap"
     description = "Dropper analysis using WinDbg."
-    acts_on = ["word", "html", "powerpoint", "excel", "javascript", "rtf"]
+    acts_on = ["word", "html", "powerpoint", "excel", "javascript", "rtf", "vbscript"]
 
     config = [
         {
@@ -165,7 +165,8 @@ class CutTheCrap(IsolatedProcessingModule, EventHandler):
 
     def set_extension(self, target, file_type):
         extensions = {
-            'javascript': 'js'
+            'javascript': 'js',
+            'vbscript': 'vbs'
         }
 
         if file_type in extensions:
@@ -182,7 +183,8 @@ class CutTheCrap(IsolatedProcessingModule, EventHandler):
             'html': "{}\\{}".format(self.office_path, "WINWORD.EXE"),
             'excel': "{}\\{}".format(self.office_path, "EXCEL.EXE"),
             'powerpoint': "{}\\{}".format(self.office_path, "POWERPOINT.EXE"),
-            'javascript': 'C:\\Windows\\system32\\wscript.exe'
+            'javascript': 'C:\\Windows\\system32\\wscript.exe',
+            'vbscript': 'C:\\Windows\\system32\\wscript.exe'
         }
 
         self.files = set()
