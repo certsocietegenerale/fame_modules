@@ -332,11 +332,12 @@ class CutTheCrap(IsolatedProcessingModule, EventHandler):
         if dwDesiredAccess & 0x40000000:
             stack_trace = thread.get_stack_trace()
             for fcall in stack_trace:
-                if fcall[2].split('\\')[-1] in ['scrrun.dll', 'msado15.dll']:
+                if fcall[2].split('\\')[-1] in ['scrrun.dll', 'msado15.dll', 'VBE7.DLL']:
                     self.record_file(filename, 'CreateFile')
                     break
             else:
                 self.log('debug', 'ignoring file {}'.format(filename))
+                self.log('debug', stack_trace)
 
     def bp_CreateFileW(self, event):
         return self.bp_CreateFile(event)
