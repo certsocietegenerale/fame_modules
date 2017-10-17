@@ -198,6 +198,10 @@ class CutTheCrap(IsolatedProcessingModule, EventHandler):
         monkey.click_on("Microsoft Word", "No", "start Word in safe mode")
         monkey.click_on("Microsoft Word", "Yes", "caused a serious error")
         monkey.click_on("File In Use", "OK", "locked for editing")
+        monkey.click_on("Microsoft Word", "Yes", "that may refer to other files")
+        monkey.click_on("Microsoft Excel", "Yes", "that may refer to other files")
+        monkey.click_on("Microsoft Word", "Yes", "Do you want to start")
+        monkey.click_on("Microsoft Excel", "Yes", "Do you want to start")
         monkey.close("Activation Wizard")
         monkey.start()
 
