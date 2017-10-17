@@ -32,8 +32,8 @@ class OfficeMacros(ProcessingModule):
                 'IOC': [],
                 'Hex String': [],
                 'Base64 String': [],
-                'Dridex String': [],
-                'VBA String': [],
+                'Dridex string': [],
+                'VBA string': [],
                 'Form String': []
             }
         }
