@@ -99,6 +99,9 @@ class Cuckoo(ProcessingModule):
         # Get back memory dump
         self.get_memory_dump()
 
+        # Get back PCAP file
+        self.get_pcap()
+
         # Add report URL to results
         self.results['URL'] = urljoin(self.web_endpoint, "/analysis/{}/summary/".format(self.task_id))
 
@@ -182,6 +185,12 @@ class Cuckoo(ProcessingModule):
         response = requests.get(url, stream=True)
 
         self.register_response_as('memory_dump', response)
+
+    def get_pcap(self):
+        url = urljoin(self.api_endpoint, '/pcap/get/{0}'.format(self.task_id))
+        response = requests.get(url, stream=True)
+
+        self.register_response_as('pcap', response)
 
     def register_response_as(self, type, response, zipped=False):
         if response.status_code != 200:
