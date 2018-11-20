@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+from defang import defang
 import json
 
 from fame.common.exceptions import ModuleInitializationError
@@ -38,7 +39,8 @@ class Slack(ReportingModule):
             return False
 
     def done(self, analysis):
-        string = "Just finished analysis on {0}\n".format(', '.join(analysis._file['names']))
+
+        string = "Just finished analysis on {0}\n".format(defang(', '.join(analysis._file['names'])))
 
         if analysis['module'] is not None:
             string += "Target: {0}\n".format(analysis['module'])
