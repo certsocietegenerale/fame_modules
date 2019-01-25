@@ -10,8 +10,19 @@ class Zip(ProcessingModule):
     description = "Extract files from ZIP archive."
     acts_on = "zip"
 
+    config = [
+        {
+            "name": "password_candidates",
+            "type": "text",
+            "default": "virus\ninfected",
+            "description": "List of passwords to try when unpacking an encrypted ZIP file (one per line)."
+        }
+    ]
+
     def each(self, target):
         tmpdir = tempdir()
+
+        password_candidates = self.password_candidates.split("\n")
 
         zf = ZipFile(target)
 
@@ -29,7 +40,7 @@ class Zip(ProcessingModule):
                     if os.path.isfile(filepath):
                         self.add_extracted_file(filepath)
                 except RuntimeError:
-                    for password in ['virus', 'infected']:
+                    for password in password_candidates:
                         try:
                             filepath = zf.extract(name, tmpdir, pwd=password)
                             if os.path.isfile(filepath):
@@ -38,6 +49,6 @@ class Zip(ProcessingModule):
                         except RuntimeError:
                             pass
                     else:
-                        self.log('error', 'Could not extract {}'.format(name))
+                        self.log('error', 'Could not extract {} (password not known)'.format(name))
 
         return True
