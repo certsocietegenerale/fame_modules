@@ -3,7 +3,6 @@
 import os
 import re
 import json
-import sys
 from subprocess import check_output, CalledProcessError
 
 from fame.core.module import ProcessingModule
