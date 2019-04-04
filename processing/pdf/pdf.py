@@ -1,6 +1,9 @@
+# -*- coding: utf-8 -*-
+
 import os
 import re
 import json
+import sys
 from subprocess import check_output, CalledProcessError
 
 from fame.core.module import ProcessingModule
@@ -25,36 +28,35 @@ class PDF(ProcessingModule):
             'objects_content': dict(),
             'links': []
         }
-
         # First, get analysis summary
-        analysis = self.peepdf("-f", "-j", target)
-        analysis = json.loads(analysis)['peepdf_analysis']['advanced'][0]['version_info']
+        analysisraw = self.peepdf("-f", "-j", target)
+        
+        # Iterate through all elements in the array
+        for a_element in json.loads(analysisraw)['peepdf_analysis']['advanced']:
+    
+            analysis = a_element['version_info']
+            # List every suspicious objecta
+            for object_type in ['actions', 'triggers']:
+                if analysis['suspicious_elements'][object_type]:
+                    for element in analysis['suspicious_elements'][object_type]:
+                        self.results['suspicious_objects'].append((element, analysis['suspicious_elements'][object_type][element]))
+                        self.fetch_objects(target, analysis['suspicious_elements'][object_type][element])
+            for element in analysis['suspicious_elements']['elements']:
+                if element['vuln_cve_list']:
+                    self.results['exploits'].append(element)
+                else:
+                    self.results['suspicious_objects'].append((element['name'], element['objects']))
+                self.fetch_objects(target, element['objects'])
+                self.results['suspicious_objects'].append(('Objects with JS', analysis['js_objects']))
 
-        # List every suspicious object
-        for object_type in ['actions', 'triggers']:
-            if analysis['suspicious_elements'][object_type]:
-                for element in analysis['suspicious_elements'][object_type]:
-                    self.results['suspicious_objects'].append((element, analysis['suspicious_elements'][object_type][element]))
-                    self.fetch_objects(target, analysis['suspicious_elements'][object_type][element])
-
-        for element in analysis['suspicious_elements']['elements']:
-            if element['vuln_cve_list']:
+            # See if we found any exploit
+            for element in analysis['suspicious_elements']['js_vulns']:
                 self.results['exploits'].append(element)
-            else:
-                self.results['suspicious_objects'].append((element['name'], element['objects']))
-            self.fetch_objects(target, element['objects'])
-
-        # See if we have objects with JS
-        if analysis['js_objects']:
-            self.results['suspicious_objects'].append(('Objects with JS', analysis['js_objects']))
-
-        # See if we found any exploit
-        for element in analysis['suspicious_elements']['js_vulns']:
-            self.results['exploits'].append(element)
-            self.fetch_objects(target, element['objects'])
+                self.fetch_objects(target, element['objects'])
 
         # Look for links
         self.search_links(target)
+        self.log("Warning",self.results)
 
         # Remove the commands file
         try:
@@ -72,11 +74,11 @@ class PDF(ProcessingModule):
 
     def fetch_objects(self, target, ids):
         for object_id in ids:
-            self.results['objects_content'][str(object_id)] = self.fetch_object(target, object_id)
+            self.results['objects_content'][str(object_id)] = self.fetch_object(target, object_id).decode("utf8",errors='replace')
 
     def search_links(self, target):
         links = set()
-
+        self.log("warning",target)
         try:
             object_list = self.peepdf("-f", "-C", "search URI", target)
             if '[' in object_list:
