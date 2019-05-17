@@ -1,5 +1,6 @@
 import os
 import re
+import io
 import time
 import mimetypes
 from zipfile import ZipFile, BadZipfile
@@ -9,6 +10,12 @@ from urllib import urlopen, urlencode
 from fame.core.module import ProcessingModule
 from fame.common.utils import tempdir
 from fame.common.exceptions import ModuleInitializationError, ModuleExecutionError
+
+try:
+    from jbxapi import JoeSandbox, JoeException
+    HAVE_JBXAPI = True
+except ImportError:
+    HAVE_JBXAPI = False
 
 try:
     import requests
@@ -41,18 +48,6 @@ class Joe(ProcessingModule):
             'description': 'API Key to use to connect to your account.'
         },
         {
-            'name': 'base_url',
-            'type': 'str',
-            'default': 'https://jbxcloud.joesecurity.org/index.php/api/',
-            'description': 'URL of the API endpoint.'
-        },
-        {
-            'name': 'analysis_url',
-            'type': 'str',
-            'default': 'https://jbxcloud.joesecurity.org/analysis/{0}',
-            'description': 'URL of an analysis. Must contain "{}" that will be replaced with the analysis ID.'
-        },
-        {
             'name': 'wait_timeout',
             'type': 'integer',
             'default': 5400,
@@ -79,6 +74,8 @@ class Joe(ProcessingModule):
 
     def initialize(self):
         # Check dependencies
+        if not HAVE_JBXAPI:
+            raise ModuleInitializationError(self, "Missing dependency: jbxapi")
         if not HAVE_REQUESTS:
             raise ModuleInitializationError(self, "Missing dependency: requests")
         if not HAVE_IJSON:
@@ -86,20 +83,23 @@ class Joe(ProcessingModule):
         if not HAVE_BS4:
             raise ModuleInitializationError(self, "Missing dependency: bs4")
 
+
     def each_with_type(self, target, file_type):
-        # Define base params
-        self.joe_params = {
-            'apikey': self.apikey,
-            'tandc': "1"
-        }
-
+        self.joe = JoeSandbox(apikey=self.apikey, accept_tac=True)
+        self.analysis_url = "https://jbxcloud.joesecurity.org/analysis/{}/0/html"
         self.results = dict()
-
-        # First, submit the file
-        self.submit_file(target, file_type)
+        try:
+            #data = self.submit_file(target, file_type)
+            #self.submission_id = data["submission_id"]
+            self.submission_id = '933442'
+        except JoeException as error:
+            raise ModuleExecutionError("{}".format(error))
 
         # Wait for analysis to be over
         self.wait_for_analysis()
+
+        # Add report URL to results
+        self.results['URL'] = self.analysis_url.format(self.analysisid)
 
         # Get report, and extract IOCs
         self.process_report()
@@ -107,143 +107,91 @@ class Joe(ProcessingModule):
         # Get unpacked executables
         self.get_unpacked_executables()
 
-        # Add report URL to results
-        self.results['URL'] = self.analysis_url.format(self.joe_params['webid'])
-
         return True
 
+
     def submit_file(self, target, file_type):
-        url = self.base_url + 'analysis'
-
         if self.allow_internet_access:
-            inet = "1"
+            internet_access = "1"
         else:
-            inet = "0"
-
+            internet_access = "0"
         params = {
-            'apikey': (None, self.apikey),
-            'tandc': (None, "1"),
-            'type': (None, "file"),
-            'auto': (None, "1"),
-            'inet': (None, inet),
-            'ssl': (None, inet),
-            'scae': (None, "1"),
-            'vbainstr': (None, "1"),
-            'comments': (None, 'Submitted via FAME'),
+            'internet-access': internet_access,
+            'ssl-inspection': "1",
+            'comments': 'Submitted via FAME',
         }
-
         if file_type == 'url':
-            params['type'] = (None, "url")
-            params['url'] = (None, target)
+            data = self.joe.submit_sample_url(target, params=params)
         else:
-            if file_type == 'apk':
-                del params['auto']
-                params['android1'] = (None, "1")
+            with open(target, "rb") as f:
+                data = self.joe.submit_sample(f, params=params)
+        return data
 
-            params['sample'] = (os.path.basename(target), open(target, 'rb'), mimetypes.guess_type(target)[0] or 'application/octet-stream')
-
-        r = requests.post(url, files=params)
-
-        if r.status_code != 200:
-            raise ModuleExecutionError('could not submit: {0}'.format(r.text))
-
-        results = r.json()
-        self.joe_params['webid'] = results['webid']
 
     def wait_for_analysis(self):
-        url = self.base_url + 'analysis/check'
-
         waited_time = 0
         while waited_time < self.wait_timeout:
-            response = requests.post(url, data=self.joe_params)
-            status = response.json()['status']
-
+            try:
+                data = self.joe.submission_info(self.submission_id)
+                status = data["status"]
+            except JoeException as error:
+                raise ModuleExecutionError("Error while waiting for analysis:\n{}".format(error))
             if status == 'finished':
-                # Figure out which run is the most interesting
-                self.joe_params['run'] = 0
-                detections = response.json()['detections'].rstrip(';').split(';')
-
-                max_score = 0
-                for i, score in enumerate(detections):
-                    if score > max_score:
-                        max_score = score
-                        self.joe_params['run'] = i
-
                 break
-
             time.sleep(self.wait_step)
             waited_time += self.wait_step
-
         if status != 'finished':
-            raise ModuleExecutionError('could not get report before timeout.')
+            raise ModuleExecutionError('Could not get report before timeout.')
+        try:
+            submission_info = self.joe.submission_info(self.submission_id)
+            self.webid = submission_info["most_relevant_analysis"]["webid"]
+            analysis_info = self.joe.analysis_info(self.webid)
+            self.analysisid = analysis_info["analysisid"]
+        except JoeException as error:
+            raise ModuleExecutionError("Error while getting analysis details:\n{}".format(error))
+
 
     def process_report(self):
-        url = self.base_url + 'analysis/download'
-
-        # Download JSON report to extract IOCs
-        params = dict(self.joe_params)
-        params['type'] = 'lightjson'
-
-        response = urlopen(url, urlencode(params))
-
-        if response.getcode() != 200:
-            self.log('error', 'could not find report for task id {}: {}'.format(self.joe_params['webid'], response.read()))
-        else:
-            self.extract_iocs(response)
-
-        # Download HTML report to extract execution graph
-        params['type'] = 'lighthtml'
-        response = urlopen(url, urlencode(params))
-
-        if response.getcode() != 200:
-            self.log('error', 'could not find report for task id {}: {}'.format(self.joe_params['webid'], response.read()))
-        else:
+        try:
+            data = self.joe.analysis_download(self.webid, type="lightjson")
+            report = io.BytesIO(data[1])
+            self.extract_iocs(report)
+            data = self.joe.analysis_download(self.webid, type="html")
+            report = io.BytesIO(data[1])
+            self.extract_graph(report)
             tmpdir = tempdir()
             filepath = os.path.join(tmpdir, 'joe_report.html')
             with open(filepath, 'w+b') as fd:
-                copyfileobj(response, fd)
-                fd.seek(0, 0)
-                self.extract_graph(fd)
-
+                fd.write(data[1])
             self.add_support_file('Report', filepath)
+        except Exception as error:
+            raise ModuleExecutionError('Error encountered while processing report:\n{}'.format(error))
+
 
     def get_unpacked_executables(self):
-        url = self.base_url + 'analysis/download'
-
-        # Download JSON report to extract IOCs
-        params = dict(self.joe_params)
-        params['type'] = 'unpackpe'
-
-        response = urlopen(url, urlencode(params))
-
-        if response.getcode() != 200:
-            self.log('error', 'could not find unpacked PEs for task id {}: {}'.format(self.joe_params['webid'], response.read()))
-        else:
+        try:
+            data = self.joe.analysis_download(self.webid, "unpackpe")
+            unpackpe = io.BytesIO(data[1])
             tmpdir = tempdir()
-            filepath = os.path.join(tmpdir, 'unpacked.zip')
-            with open(filepath, 'w+b') as fd:
-                copyfileobj(response, fd)
-
-            try:
-                unpacked_files = []
-                zf = ZipFile(filepath)
+            unpacked_files = []
+            with ZipFile(unpackpe) as zf:
                 for name in zf.namelist():
                     unpacked_files.append(zf.extract(name, tmpdir, pwd='infected'))
+            self.register_files('unpacked_executable', unpacked_files)
+        except Exception as err:
+            raise ModuleExecutionError('Error encountered while processing unpacked executables:\n{}'.format(err))
 
-                self.register_files('unpacked_executable', unpacked_files)
-            except BadZipfile:
-                pass
 
     def extract_url(self, scheme, iocs, request):
         match = re.match(r'(GET|POST) (\S+) .*Host: (\S+)', request, re.DOTALL)
         if match:
             iocs.add("{}://{}{}".format(scheme, match.group(3), match.group(2)))
 
+
     def extract_iocs(self, report):
         iocs = set()
         parser = ijson.parse(report)
         lines = ""
-
         for prefix, event, value in parser:
             if prefix in [
                 "analysis.behavior.network.tcp.packet.item.srcip",
@@ -273,9 +221,11 @@ class Joe(ProcessingModule):
         for ioc in iocs:
             self.add_ioc(ioc)
 
+
     def extract_graph(self, report):
         report = BeautifulSoup(report, 'html.parser')
         graph = report.find(id='behaviorGraph')
         if graph is not None:
             graph = graph.find('svg')
             self.results['graph'] = graph.encode('utf8')
+
