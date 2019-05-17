@@ -89,9 +89,8 @@ class Joe(ProcessingModule):
         self.analysis_url = "https://jbxcloud.joesecurity.org/analysis/{}/0/html"
         self.results = dict()
         try:
-            #data = self.submit_file(target, file_type)
-            #self.submission_id = data["submission_id"]
-            self.submission_id = '933442'
+            data = self.submit_file(target, file_type)
+            self.submission_id = data["submission_id"]
         except JoeException as error:
             raise ModuleExecutionError("{}".format(error))
 
