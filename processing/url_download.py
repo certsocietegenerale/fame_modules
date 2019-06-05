@@ -26,6 +26,9 @@ class URLDownload(ProcessingModule):
             except KeyError:
                 filename = target.split('/')[-1]
 
+            if not filename:
+                filename = "no_filename"
+
             filepath = os.path.join(tmpdir, filename)
 
             with open(filepath, 'wb') as fd:
