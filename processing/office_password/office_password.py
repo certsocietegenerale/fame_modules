@@ -1,14 +1,22 @@
 import os
-from msoffcrypto import OfficeFile
 
 from fame.core.module import ProcessingModule
 from fame.common.utils import tempdir
+from fame.common.exceptions import ModuleInitializationError
+
+
+try:
+    from msoffcrypto import OfficeFile
+
+    HAVE_MSOFFCRYPTO = True
+except ImportError:
+    HAVE_MSOFFCRYPTO = False
 
 
 class OfficePassword(ProcessingModule):
     name = "office_password"
     description = "Decrypt password protected office documents."
-    acts_on = "word,excel,powerpoint"
+    acts_on = ["word,excel,powerpoint"]
 
     config = [
         {
@@ -18,6 +26,10 @@ class OfficePassword(ProcessingModule):
             "description": "List of passwords to try when decrypting an encrypted Office document (one per line)."
         }
     ]
+
+    def initialize(self):
+        if not HAVE_MSOFFCRYPTO:
+            raise ModuleInitializationError(self, "Missing dependency: msoffcrypto")
 
     def each(self, target):
         tmpdir = tempdir()
