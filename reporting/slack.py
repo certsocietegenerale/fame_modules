@@ -1,5 +1,4 @@
 from __future__ import unicode_literals
-from defang import defang
 import json
 
 from fame.common.exceptions import ModuleInitializationError
@@ -10,6 +9,12 @@ try:
     HAVE_REQUESTS = True
 except ImportError:
     HAVE_REQUESTS = False
+
+try:
+    from defang import defang
+    HAVE_DEFANG = True
+except ImportError:
+    HAVE_DEFANG = False
 
 
 class Slack(ReportingModule):
@@ -33,6 +38,9 @@ class Slack(ReportingModule):
         if ReportingModule.initialize(self):
             if not HAVE_REQUESTS:
                 raise ModuleInitializationError(self, "Missing dependency: requests")
+
+            if not HAVE_DEFANG:
+                raise ModuleInitializationError(self, "Missing dependency: defang")
 
             return True
         else:
