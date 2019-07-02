@@ -1,0 +1,27 @@
+<div class="col-md-12">
+    <div class="card">
+        <div class="header">
+            <h4 class="title">Exiftool (metadata)</h4>
+            <p class="category">Detailed Results</p>
+        </div>
+
+        <div class="content">
+            <table class="table">
+                <thead>
+                  <tr>
+                    <th>Attribute</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    {% for attribute, value in results %}
+                        <tr>
+                            <td>{{attribute}}</td>
+                            <td>{{value}}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+              </table>
+        </div>
+    </div>
+</div>

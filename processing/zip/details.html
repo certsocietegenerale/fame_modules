@@ -1,0 +1,22 @@
+<div class="col-md-12">
+    <div class="card">
+        <div class="header">
+            <h4 class="title">ZIP</h4>
+            <p class="category">Detailed Results</p>
+        </div>
+        <div class="content">
+            {% for warning in results.warnings %}
+                <div class="close-alert alert alert-warning">{{warning}}</div>
+            {% endfor %}
+
+            {% if results.files %}
+                <label>Files</label>
+                <div class="labeled-content">
+                    {% for filepath in results.files %}
+                        <div>{{filepath}}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

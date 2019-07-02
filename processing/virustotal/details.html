@@ -1,0 +1,53 @@
+<div class="col-md-12">
+    <div class="card">
+        <div class="header">
+            <h4 class="title">Virus Total Report</h4>
+            <p class="category">Detailed Results</p>
+        </div>
+        <div class="content">
+          <div>
+            <label>Score</label>
+            {% if 'positives' in results %}
+                {% if results['positives'] > 9 %}
+                    <h2 style="margin: 0 0 15px; 0"><span class="label label-danger">{{results['positives']}} / {{results['total']}}</span></h2>
+                {% elif results['positives'] > 0 %}
+                    <h2 style="margin: 0 0 15px; 0"><span class="label label-warning">{{results['positives']}} / {{results['total']}}</span></h2>
+                {% else %}
+                    <h2 style="margin: 0 0 15px; 0"><span class="label label-success">{{results['positives']}} / {{results['total']}}</span></h2>
+                {% endif %}
+            {% endif %}
+            <label>Scan Date</label>
+            <div class="labeled_content">
+                {{results['scan_date']}}
+            </div>
+            <label>Permalink</label>
+            <div class="labeled_content">
+                <a href={{ results['permalink'] }} target=_blank>{{ results['permalink'] }}</a>
+            </div>
+            {% if results['positives'] > 0 %}
+                <label>Detections</label>
+                <table class='table table-bordered'>
+                    <thead>
+                        <tr>
+                            <td>Engine</td>
+                            <td>Detection</td>
+                            <td>Version</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for engine in results['scans'] %}
+                            {% if results['scans'][engine]['detected'] %}
+                                <tr>
+                                    <td>{{engine}}</td>
+                                    <td>{{results['scans'][engine]['result']}}</td>
+                                    <td>{{results['scans'][engine]['update']}}</td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+          </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,177 @@
+<div class="col-md-12">
+    <div class="card">
+        <div class="header">
+            <h4 class="title">{{name}}</h4>
+            <p class="category">Detailed Results</p>
+        </div>
+        <div class="content">
+          <div>
+            <h5><B>Generic information</B></h5>
+            <table class='table table-bordered'>
+              <tbody>
+                <tr >
+                    <td><B>Subject</B></td>
+                    <td>{{ results['Subject'] }}</td>
+                </tr>
+                <tr>
+                    <td><B>Creation time </B></td>
+                    <td>{{ results['Date'] }}</td>
+                </tr>
+                {% if results['ReturnPath'] %}
+                    {% if results['ReturnPath'] in results['From'] %}
+                        <tr>
+                    {% else %}
+                        <tr class="text-warning">
+                    {% endif %}
+                        <td><B>From </B></td>
+                        <td>{{ results['From'] }}</td>
+                    </tr>
+                    {% if results['ReturnPath'] in results['From'] %}
+                        <tr>
+                    {% else %}
+                        <tr class="text-warning">
+                    {% endif %}
+                        <td><B>Return Path </B></td>
+                        <td>{{ results['ReturnPath'] }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td><B>From </B></td>
+                        <td>{{ results['From'] }}</td>
+                    </tr>
+                {% endif %}
+                {% if results['ReplyTo'] %}
+                        {% if results['ReplyTo'] in results['From'] %}
+                            <tr>
+                        {% else %}
+                            <tr class="text-warning">
+                        {% endif %}
+                        <td><B>Reply To</B></td>
+                        <td>{{ results['ReplyTo'] }}</td>
+                    </tr>
+                {% endif %}
+                <tr>
+                    <td><B>To </B></td>
+                    <td>{{ results['To'] }}</td>
+                </tr>
+                {% if results['Cc'] %}
+                <tr>
+                    <td><B>Cc </B></td>
+                    <td>{{ results['Cc'] }}</td>
+                </tr>
+                {% endif %}
+                
+                {% if results['SPF'] %}
+                    <tr>
+                        <td><b>SPF</b></td>
+                        <td>
+                            {% for domain in results['SPF'] %}
+                                {% if 'fail' in results['SPF'][domain] %}
+                                <div class="text-danger">
+                                {% elif 'pass' in results['SPF'][domain] %}
+                                <div class="text-success">
+                                {% else %}
+                                <div>
+                                {% endif %}
+                                    {{domain}}: {{results['SPF'][domain]}}
+                                </div>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endif %}
+
+                {% if results['DKIM'] %}
+                    <tr>
+                        <td><b>DKIM</b></td>
+                        <td>
+                            {% for domain in results['DKIM'] %}
+                                {% if 'fail' in results['DKIM'][domain] %}
+                                <div class="text-danger">
+                                {% elif 'pass' in results['DKIM'][domain] %}
+                                <div class="text-success">
+                                {% else %}
+                                <div>
+                                {% endif %}
+                                    {{domain}}: {{results['DKIM'][domain]}}
+                                </div>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endif %}
+
+                {% if results['DMARC'] %}
+                    <tr>
+                        <td><b>DMARC</b></td>
+                        <td>
+                            {% for domain in results['DMARC'] %}
+                                {% if 'fail' in results['DMARC'][domain] %}
+                                <div class="text-danger">
+                                {% elif 'pass' in results['DMARC'][domain] %}
+                                <div class="text-success">
+                                {% else %}
+                                <div>
+                                {% endif %}
+                                    {{domain}}: {{results['DMARC'][domain]}}
+                                </div>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+
+          <div>
+            <h5><B>Successive hops</B></h5>
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th style="width: 7%" scope="col">Delay</th>
+                  <th scope="col">From</th>
+                  <th scope="col"></th>
+                  <th scope="col">To</th>
+                  <th style="width: 10%" scope="col">Protocol</th>
+                  <th scope="col">Time received</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for value in results['Received'] %}
+                <tr>
+                  <td>{{ value.order }} </td>
+                  <td >{{value.delay}}</td>
+                  <td>{{value.from}}</td>
+                  <td>→</td>
+                  <td>{{value.to}}</td>
+                  <td >{{value.protocol}}</td>
+                  <td>{{value.timestamp}}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <h5><B>Other headers</B></h5>
+            <table class="table table-bordered" style="table-layout: fixed; width: 100%">
+                  <thead>
+                    <tr>
+                      <th style="width: 20%"> Key </th>
+                      <th style="word-wrap: break-word"> Value </th>
+                    </tr>
+                  </thead>
+                  {% for k,v in results['headers'] %} {% if k not in ['Received','Subject','From','To','CC','Date', 'Return-Path', 'Reply-To'] %}
+                  {% if k|lower in results['highlight'] %}
+                  <tr class="text-info">
+                  {% else %}
+                  <tr>
+                  {% endif %}
+                      <td>{{ k }}</td>
+                      <td >{{ v }}</td>
+                  </tr>
+                  {% endif %} {% endfor %}
+              </table>
+
+          </div>
+        </div>
+    </div>
+</div>

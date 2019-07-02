@@ -1,0 +1,1 @@
+virustotal-api==1.1.10
