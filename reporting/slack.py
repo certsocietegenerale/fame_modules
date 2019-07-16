@@ -50,8 +50,8 @@ class Slack(ReportingModule):
 
         string = "Just finished analysis on {0}\n".format(defang(', '.join(analysis._file['names'])))
 
-        if analysis['module'] is not None:
-            string += "Target: {0}\n".format(analysis['module'])
+        if analysis['modules'] is not None:
+            string += "Target: {0}\n".format(analysis['modules'])
 
         if len(analysis['extractions']) > 0:
             string += "Extractions: {0}\n".format(','.join([x['label'] for x in analysis['extractions']]))
