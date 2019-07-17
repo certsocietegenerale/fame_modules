@@ -68,5 +68,5 @@ class Mattermost(ReportingModule):
         for module in analysis['modules']:
             executed = ':ok_hand: executed' if module in analysis['executed_modules'] else ':rage2: execution failed'
             array += "| {0}     | {1}         | TBD                           |\n".format(module,executed)
-        data = {'text': string + array 
+        data = {'text': string + array }
         requests.post(self.url, data={'payload': json.dumps(data)})
