@@ -51,7 +51,10 @@ class Mattermost(ReportingModule):
         string = "Just finished analysis on {0}\n".format(defang(', '.join(analysis._file['names'])))
 
         if analysis['modules'] is not None:
-            string += "Target: {0}\n".format(analysis['modules'])
+            string += "modules used: "
+            for module in analysis['modules']:
+                string += "{0} ".format(module)
+            string += "\n"
 
         if len(analysis['extractions']) > 0:
             string += "Extractions: {0}\n".format(','.join([x['label'] for x in analysis['extractions']]))
@@ -59,7 +62,11 @@ class Mattermost(ReportingModule):
         if len(analysis['probable_names']) > 0:
             string += "Probable Names: {0}\n".format(','.join(analysis['probable_names']))
 
-        string += "<{0}/analyses/{1}|See analysis>".format(self.fame_base_url, analysis['_id'])
-
-        data = {'text': string}
+        string += "<{0}/analyses/{1}|See analysis>\n\n".format(self.fame_base_url, analysis['_id'])
+        array =  "| modules used | execution status | TBD                                   |\n"
+        array += "|:-----------|:-----------:|:-----------------------------------------------|\n"
+        for module in analysis['modules']:
+            executed = ':ok_hand: executed' if module in analysis['executed_modules'] else ':rage2: execution failed'
+            array += "| {0}     | {1}         | TBD                           |\n".format(module,executed)
+        data = {'text': string + array 
         requests.post(self.url, data={'payload': json.dumps(data)})
