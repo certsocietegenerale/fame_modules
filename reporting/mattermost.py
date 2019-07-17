@@ -19,7 +19,7 @@ except ImportError:
 
 class Mattermost(ReportingModule):
     name = "mattermost"
-    description = "Post message on Slack when an analysis if finished."
+    description = "Post message on Mattermost when an analysis if finished."
 
     config = [
         {
