@@ -59,6 +59,9 @@ class Mattermost(ReportingModule):
         if len(analysis['extractions']) > 0:
             string += "Extractions: {0}\n".format(','.join([x['label'] for x in analysis['extractions']]))
 
+        if len(analysis['iocs']) > 0:
+            string += "IOCs: {0}\n".format(','.join(analysis['iocs']))
+
         if len(analysis['probable_names']) > 0:
             string += "Probable Names: {0}\n".format(','.join(analysis['probable_names']))
 
