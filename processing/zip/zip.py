@@ -6,7 +6,7 @@ from fame.common.utils import tempdir
 
 
 class Zip(ProcessingModule):
-    name = "zip2"
+    name = "zip"
     description = "Extract files from ZIP archive."
     acts_on = "zip"
 
