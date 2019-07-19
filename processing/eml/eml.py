@@ -8,8 +8,8 @@ from fame.core.module import ProcessingModule
 from fame.common.utils import tempdir
 
 
-class EML2(ProcessingModule):
-    name = "eml2"
+class EML(ProcessingModule):
+    name = "eml"
     description = "Extract attachments and headers from .eml messages."
     acts_on = "eml"
 
