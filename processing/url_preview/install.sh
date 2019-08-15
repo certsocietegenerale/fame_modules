@@ -1,5 +1,5 @@
 #!/bin/bash
-SCRIPT=`realpath $0`
-SCRIPTPATH=`dirname $SCRIPT`
 
-docker build -t fame/url_preview $SCRIPTPATH/docker
+apt-get update && apt-get install --no-install-recommends -y docker.io || exit $?
+
+bash build.sh || exit $?

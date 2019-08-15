@@ -1,5 +1,5 @@
 #!/bin/bash
-SCRIPT=`realpath $0`
-SCRIPTPATH=`dirname $SCRIPT`
 
-docker build -t fame/exiftool $SCRIPTPATH/docker
+apt-get update && apt-get install -y --no-install-recommends docker.io || exit $?
+
+bash build.sh || exit $?

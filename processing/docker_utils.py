@@ -17,7 +17,11 @@ def temp_volume(target):
     """Create a temporary directory and copy the target to it.
 
     Meant to be mounted inside the Docker container to send the target and get the results."""
-    tmp = tempdir()
+    prefix = None
+    if os.getenv("FAME_DOCKER", "0") == "1":
+        prefix = "/fame/docker-storage"
+
+    tmp = tempdir(prefix)
 
     os.makedirs(os.path.join(tmp, 'output'))
     copy(target, os.path.join(tmp, os.path.basename(target)))

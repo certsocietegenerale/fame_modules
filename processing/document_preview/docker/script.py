@@ -12,13 +12,17 @@ def pdftoimages(target, max_pages):
     counter = 0
 
     # create folder if not exists
-    if not os.path.isdir('output'):
-        os.mkdir('output')
+    output_dir = os.path.join(os.path.dirname(target), 'output')
+
+    try:
+        os.makedirs(output_dir)
+    except OSError:
+        pass
 
     # save pages to jpeg format
     for page in pages:
         counter = counter + 1
-        page.save('./output/{}_{}.jpeg'.format(re.sub('[^A-Za-z0-9]+', '_', target), counter))
+        page.save(os.path.join(output_dir, '{}_{}.jpeg'.format(re.sub('[^A-Za-z0-9]+', '_', target), counter)))
 
     if counter == 0:
         print('error: could not convert PDF to images')
@@ -26,7 +30,7 @@ def pdftoimages(target, max_pages):
 
 def libreofficeconversion(args):
     # convert to pdf using libreoffice
-    convert_pdf = 'libreoffice --headless --convert-to pdf "{}" 2> /dev/null'.format(os.path.basename(args.target))
+    convert_pdf = 'libreoffice --headless --convert-to pdf "{}" --outdir "{}" 2> /dev/null'.format(args.target, os.path.dirname(args.target))
     os.system(convert_pdf)
 
     if os.path.exists(os.path.splitext(args.target)[0] + '.pdf'):

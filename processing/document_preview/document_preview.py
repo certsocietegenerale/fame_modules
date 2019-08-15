@@ -28,6 +28,12 @@ class DocumentPreview(ProcessingModule):
             'type': 'integer',
             'default': 5,
             'description': 'Specify the maximum number of pages to display',
+        },
+        {
+            'name': 'docker_volume_name',
+            'type': 'str',
+            'default': 'fame_fame-share',
+            'description': 'Docker volume name which is to be used for sharing samples with the Docker container of this module.'
         }
     ]
 
@@ -38,7 +44,8 @@ class DocumentPreview(ProcessingModule):
         return True
 
     def save_output(self, output):
-        self.log("debug", output)
+        if output:
+            self.log("debug", output)
 
     def save_images(self, directory):
         extracted_images = False
@@ -57,15 +64,26 @@ class DocumentPreview(ProcessingModule):
         return extracted_images
 
     def preview(self, target, target_type):
+        target = os.path.join(
+            os.path.basename(self.outdir),
+            os.path.basename(target)
+        )
 
-        args = u"--target \"{}\" --target_type {} --max_pages {}".format(
-            os.path.basename(target), target_type, self.max_pages)
+        if os.getenv("FAME_DOCKER", "0") == "1":
+            # mount docker volume instead of host directory
+            volumes = {self.docker_volume_name: {'bind': '/data', 'mode': 'rw'}}
+        else:
+            data_folder_path = os.path.dirname(self.outdir)
+            volumes = {data_folder_path: {'bind': '/data', 'mode': 'rw'}}
+
+        args = "--target \"{}\" --target_type {} --max_pages {}".format(
+            target, target_type, self.max_pages)
 
         # start the right docker
         return docker_client.containers.run(
             'fame/document_preview',
             args,
-            volumes={self.outdir: {'bind': '/data', 'mode': 'rw'}},
+            volumes=volumes,
             stderr=True,
             remove=True
         )
@@ -78,6 +96,8 @@ class DocumentPreview(ProcessingModule):
 
         # Execute pre-viewing on target
         output = self.preview(target, target_type)
+        if type(output) is bytes:
+            output = output.decode()
 
         # save log output from dockerized app
         self.save_output(output)

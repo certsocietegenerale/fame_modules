@@ -48,6 +48,12 @@ class UrlPreview(ProcessingModule):
             'type': 'integer',
             'default': 500,
             'description': 'Specify the network idle timeout (ms)',
+        },
+        {
+            'name': 'docker_volume_name',
+            'type': 'str',
+            'default': 'fame_fame-share',
+            'description': 'Docker volume name which is to be used for sharing samples with the Docker container of this module.'
         }
     ]
 
@@ -67,16 +73,24 @@ class UrlPreview(ProcessingModule):
             return False
 
     def preview(self, url):
-        args = 'node {} {} {}'.format(
+        if os.getenv("FAME_DOCKER", "0") == "1":
+            # mount docker volume instead of host directory
+            volumes = {self.docker_volume_name: {'bind': '/data', 'mode': 'rw'}}
+        else:
+            data_folder_path = os.path.dirname(self.outdir)
+            volumes = {data_folder_path: {'bind': '/data', 'mode': 'rw'}}
+
+        args = "node {} '{}' {}".format(
             '/script.js', url, self.network_idle_timeout)
 
         # start the right docker
         return docker_client.containers.run(
             'fame/url_preview',
             args,
-            volumes={self.outdir: {'bind': '/data', 'mode': 'rw'}},
+            volumes=volumes,
             stderr=True,
-            remove=True
+            remove=True,
+            working_dir=os.path.join("/data", os.path.basename(self.outdir))
         )
 
     def save_output(self, output):
@@ -98,7 +112,11 @@ class UrlPreview(ProcessingModule):
         }
 
         # Create temporary directory to get results
-        self.outdir = tempdir()
+        prefix = None
+        if os.getenv("FAME_DOCKER", "0") == "1":
+            prefix = "/fame/docker-storage"
+
+        self.outdir = tempdir(prefix)
 
         # Check if we're trying to analyze a local html file
         # if it is, the file is copied to the docker volume
@@ -106,11 +124,14 @@ class UrlPreview(ProcessingModule):
             copyfile(target, os.path.join(self.outdir, "input.html"))
             target = "file:///data/input.html"
 
+        if type(target) is bytes:
+            target = target.decode("utf8")
+
         # add http protocol if missing
         # requests lib needs it
         if filetype == "url" and not target.startswith('http'):
             target = 'http://{}'.format(target)
-            
+
         if filetype == "url":
             self.add_ioc(target)
 
@@ -122,6 +143,8 @@ class UrlPreview(ProcessingModule):
 
         # execute docker container
         output = self.preview(target)
+        if type(output) is bytes:
+            output = output.decode()
 
         # save log output from dockerized app, extract potential redirections
         self.save_output(output)
