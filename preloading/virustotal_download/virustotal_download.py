@@ -65,7 +65,7 @@ class VirusTotalDownload(PreloadingModule):
             except MissingConfiguration:
                 raise ModuleInitializationError(
                     'VirusTotal config not set up.')
-
-        self.log("warning", "VirusTotal config not found.")
+        else:
+            self.log("warning", "VirusTotal config not found.")
 
         return False
