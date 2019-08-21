@@ -74,10 +74,10 @@ class Yeti(ThreatIntelligenceModule):
             r = self._yeti_request('observable/', {'value': ioc, 'source': 'fame', 'tags': tags.split(',')})
         except requests.HTTPError:
             if r.status_code == 400:
-                analysis.log("warning", "Could not submit IOC \"%s\" to Yeti, \"not a viable data type\" (aka Yeti does not recognize the format the data)" % (data['value'],))
+                analysis.log("warning", "Could not submit IOC \"%s\" to Yeti, \"not a viable data type\" (aka Yeti does not recognize the format the data)" % (ioc,))
             else:
                 import traceback
-                analysis.log("warning", "Could not submit IOC \"%s\" to Yeti, HTTP status code: %d" % (data['value'], r.status_code))
+                analysis.log("warning", "Could not submit IOC \"%s\" to Yeti, HTTP status code: %d" % (ioc, r.status_code))
                 analysis.log("debug", traceback.format_exc())
 
     def _yeti_request(self, url, data):
