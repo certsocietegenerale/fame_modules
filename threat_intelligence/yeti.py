@@ -53,7 +53,6 @@ class Yeti(ThreatIntelligenceModule):
         }
 
         r = self._yeti_request('analysis/match', query)
-        r.raise_for_status()
 
         results = r.json()
         for result in results['known']:
@@ -73,7 +72,6 @@ class Yeti(ThreatIntelligenceModule):
     def ioc_submission(self, analysis, ioc, tags):
         try:
             r = self._yeti_request('observable/', {'value': ioc, 'source': 'fame', 'tags': tags.split(',')})
-            r.raise_for_status()
         except requests.HTTPError:
             if r.status_code == 400:
                 analysis.log("warning", "Could not submit IOC \"%s\" to Yeti, \"not a viable data type\" (aka Yeti does not recognize the format the data)" % (data['value'],))
@@ -96,4 +94,6 @@ class Yeti(ThreatIntelligenceModule):
                               json=data,
                               headers=headers,
                               auth=requests.auth.HTTPBasicAuth(self.user, self.password))
+        r.raise_for_status()
+
         return r
