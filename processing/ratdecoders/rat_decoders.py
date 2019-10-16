@@ -37,7 +37,7 @@ class RATDecoders(ProcessingModule):
         self.results = {}
 
     def yara_scan(self, data):
-        rules = yara.compile(os.path.join(VENDOR_ROOT, 'RATDecoders', 'yaraRules', 'yaraRules.yar'))
+        rules = yara.compile(os.path.join(VENDOR_ROOT, 'RATDecoders', 'malwareconfig', 'yaraRules', 'yaraRules.yar'))
 
         matches = rules.match(data=data)
         if len(matches) > 0:
