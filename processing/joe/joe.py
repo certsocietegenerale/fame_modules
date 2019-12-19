@@ -11,6 +11,8 @@ from fame.core.module import ProcessingModule
 from fame.common.utils import tempdir
 from fame.common.exceptions import ModuleInitializationError, ModuleExecutionError
 
+from fame.core.file import File
+
 try:
     from jbxapi import JoeSandbox, JoeException
     HAVE_JBXAPI = True
@@ -65,7 +67,15 @@ class Joe(ProcessingModule):
             'default': True,
             'description': 'This allows full Internet access to the VM running the malware.',
             'option': True
+        },
+        {
+            'name': 'force_submit',
+            'type': 'bool',
+            'default': True,
+            'description': 'Always submit samples even if they have already been processed (based on sha256)',
+            'option': True
         }
+
     ]
 
     permissions = {
@@ -88,14 +98,23 @@ class Joe(ProcessingModule):
         self.joe = JoeSandbox(apikey=self.apikey, accept_tac=True)
         self.analysis_url = "https://jbxcloud.joesecurity.org/analysis/{}/0/html"
         self.results = dict()
+        sha256 = ""
+        with open(target, 'r+b') as f:
+            filef = File(filename=f.name, stream=f)
+            sha256 = filef['sha256']
         try:
-            data = self.submit_file(target, file_type)
-            self.submission_id = data["submission_id"]
+            analysis = self.joe.analysis_search(sha256)
+            if not self.force_submit and len(analysis):
+                self.webid = analysis[0]['webid']
+                analysis_info = self.joe.analysis_info(self.webid)
+                self.analysisid = analysis_info["analysisid"]
+            else:
+                data = self.submit_file(target, file_type)
+                self.submission_id = data["submission_id"]
+                # Wait for analysis to be over
+                self.wait_for_analysis()
         except JoeException as error:
             raise ModuleExecutionError("{}".format(error))
-
-        # Wait for analysis to be over
-        self.wait_for_analysis()
 
         # Add report URL to results
         self.results['URL'] = self.analysis_url.format(self.analysisid)
@@ -155,8 +174,10 @@ class Joe(ProcessingModule):
             data = self.joe.analysis_download(self.webid, type="lightjson")
             report = io.BytesIO(data[1])
             self.extract_iocs(report)
+            report.seek(0)
+            self.extract_threatname(report)
             data = self.joe.analysis_download(self.webid, type="html")
-            report = io.BytesIO(data[1])
+            report.seek(0)
             self.extract_graph(report)
             tmpdir = tempdir()
             filepath = os.path.join(tmpdir, 'joe_report.html')
@@ -185,6 +206,14 @@ class Joe(ProcessingModule):
         match = re.match(r'(GET|POST) (\S+) .*Host: (\S+)', request, re.DOTALL)
         if match:
             iocs.add("{}://{}{}".format(scheme, match.group(3), match.group(2)))
+
+
+    def extract_threatname(self, report):
+        parser = ijson.parse(report)
+        for prefix, event, value in parser:
+            if prefix == "analysis.signaturedetections.strategy.item.threatname":
+                self.add_probable_name(str(value))
+                self.add_tag(str(value).lower())
 
 
     def extract_iocs(self, report):
