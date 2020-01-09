@@ -98,12 +98,17 @@ class Joe(ProcessingModule):
         self.joe = JoeSandbox(apikey=self.apikey, accept_tac=True)
         self.analysis_url = "https://jbxcloud.joesecurity.org/analysis/{}/0/html"
         self.results = dict()
-        sha256 = ""
-        with open(target, 'r+b') as f:
-            filef = File(filename=f.name, stream=f)
-            sha256 = filef['sha256']
+        analysis = ""
         try:
-            analysis = self.joe.analysis_search(sha256)
+            if file_type == 'url':
+                analysis = self.joe.analysis_search(target)
+            else:
+                sha256 = ""
+                basename = os.path.basename(target)
+                with open(target, 'r+b') as f:
+                    filef = File(filename=basename, stream=f)
+                    sha256 = filef['sha256']
+                analysis = self.joe.analysis_search(sha256)
             if not self.force_submit and len(analysis):
                 self.webid = analysis[0]['webid']
                 analysis_info = self.joe.analysis_info(self.webid)
@@ -113,17 +118,17 @@ class Joe(ProcessingModule):
                 self.submission_id = data["submission_id"]
                 # Wait for analysis to be over
                 self.wait_for_analysis()
+
+            # Add report URL to results
+            self.results['URL'] = self.analysis_url.format(self.analysisid)
+
+            # Get report, and extract IOCs
+            self.process_report()
+
+            # Get unpacked executables
+            self.get_unpacked_executables()
         except JoeException as error:
             raise ModuleExecutionError("{}".format(error))
-
-        # Add report URL to results
-        self.results['URL'] = self.analysis_url.format(self.analysisid)
-
-        # Get report, and extract IOCs
-        self.process_report()
-
-        # Get unpacked executables
-        self.get_unpacked_executables()
 
         return True
 
