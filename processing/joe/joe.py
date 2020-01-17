@@ -127,20 +127,25 @@ class Joe(ProcessingModule):
 
             # Get unpacked executables
             self.get_unpacked_executables()
-        except JoeException as error:
-            raise ModuleExecutionError("{}".format(error))
+        except (JoeException, Exception) as error:
+            self.log("debug", "{}".format(error))
 
         return True
 
 
     def submit_file(self, target, file_type):
         if self.allow_internet_access:
-            internet_access = "1"
+            internet_access = True
+            internet_simulation	= False
+            ssl_inspection = True
         else:
-            internet_access = "0"
+            internet_access = False
+            internet_simulation	= True
+            ssl_inspection = False
         params = {
             'internet-access': internet_access,
-            'ssl-inspection': "1",
+            'internet-simulation': internet_simulation,
+            'ssl-inspection': ssl_inspection,
             'comments': 'Submitted via FAME',
         }
         if file_type == 'url':
@@ -216,7 +221,8 @@ class Joe(ProcessingModule):
     def extract_threatname(self, report):
         parser = ijson.parse(report)
         for prefix, event, value in parser:
-            if prefix == "analysis.signaturedetections.strategy.item.threatname":
+            if prefix == "analysis.signaturedetections.strategy.item.threatname" \
+                and value is not None and str(value).lower() != "unknown":
                 self.add_probable_name(str(value))
                 self.add_tag(str(value).lower())
 
