@@ -1,1 +1,1 @@
-git+https://github.com/benua74/msg-extractor.git
+extract-msg==0.23.3
