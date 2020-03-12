@@ -187,6 +187,7 @@ class Joe(ProcessingModule):
             report.seek(0)
             self.extract_threatname(report)
             data = self.joe.analysis_download(self.webid, type="html")
+            report = io.BytesIO(data[1])
             report.seek(0)
             self.extract_graph(report)
             tmpdir = tempdir()
