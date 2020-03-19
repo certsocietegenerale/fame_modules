@@ -1,5 +1,6 @@
 # coding: utf-8
 import os
+import re
 
 try:
     # Use https://github.com/mattgwwalker/msg-extractor to read .msg files
@@ -34,6 +35,12 @@ class MSG(ProcessingModule):
 
         return paths
 
+    def extract_urls(self, mail):
+        regex_url = r"\w+:(\/?\/?)[^\s]+"
+        reg = re.compile(regex_url)
+        for match in reg.finditer(mail.body):
+            self.add_ioc(match.group(0))
+
     def register_header(self, header, outdir):
         fpath = os.path.join(outdir, '__header')
 
@@ -65,5 +72,8 @@ class MSG(ProcessingModule):
                 self.add_attachments(attachments_path)
             else:
                 self.log('debug', 'no attachment found')
+
+            #extract urls
+            self.extract_urls(mail)
         else:
             self.log('error', 'extract_msg could not parse message')
