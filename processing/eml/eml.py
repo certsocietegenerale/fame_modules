@@ -3,6 +3,8 @@
 import os
 import email.utils
 import mimetypes
+import re
+import quopri
 
 from fame.core.module import ProcessingModule
 from fame.common.utils import tempdir
@@ -30,6 +32,13 @@ class EML(ProcessingModule):
 
         self.register_files('email_headers', headers)
 
+    def extract_urls(self, mail):
+        regex_url = r"\w+:(\/\/)[^\s>\"\'\"]+"
+        reg = re.compile(regex_url)
+        content = quopri.decodestring(mail.as_string())
+        for match in reg.finditer(content):
+            self.add_ioc(match.group(0))
+
     def each(self, target):
         with open(target, 'r') as f:
             msg = email.message_from_file(f)
@@ -38,6 +47,7 @@ class EML(ProcessingModule):
 
         # Extract Headers
         self.register_headers(msg, outdir)
+        self.extract_urls(msg)
 
         # Extract Attachments
         counter = 1

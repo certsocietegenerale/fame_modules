@@ -36,7 +36,7 @@ class MSG(ProcessingModule):
         return paths
 
     def extract_urls(self, mail):
-        regex_url = r"\w+:(\/?\/?)[^\s]+"
+        regex_url = r"\w+:(\/\/)[^\s]+"
         reg = re.compile(regex_url)
         for match in reg.finditer(mail.body):
             self.add_ioc(match.group(0).strip(">"))
