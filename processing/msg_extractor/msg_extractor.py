@@ -31,7 +31,12 @@ class MSG(ProcessingModule):
         paths = []
 
         for attachment in attachments:
-            paths.append(attachment.save(customPath=outdir))
+            if attachment.type == "msg":
+                tmp = attachment.save(customPath=outdir, useFileName=True)
+                for file in os.listdir(tmp):
+                    paths.append("%s%s%s" % (tmp, os.path.sep, file))
+            else:
+                paths.append(attachment.save(customPath=outdir))
 
         return paths
 
