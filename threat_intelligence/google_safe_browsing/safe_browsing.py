@@ -90,7 +90,6 @@ class SafeBrowsingLookupAPI(ThreatIntelligenceModule):
             # post request
             response = self._google_safe_browsing_request('threatMatches:find', body)
             results = response.json()
-            print(results)
 
             # read Response
             # https://developers.google.com/safe-browsing/v4/lookup-api#http-post-response
@@ -160,7 +159,6 @@ class SafeBrowsingUpdateAPI(ThreatIntelligenceModule):
             response = self._gglsbl_request(encoded_ioc)
             if response.status_code == 200:
                 results = response.json()
-                print(results)
 
                 if 'matches' in results:
                     platforms = []
