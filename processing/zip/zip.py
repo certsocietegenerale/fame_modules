@@ -60,7 +60,7 @@ class Zip(ProcessingModule):
                     except RuntimeError:
                         for password in password_candidates:
                             try:
-                                filepath = zf.extract(name, tmpdir, pwd=password)
+                                filepath = zf.extract(name, tmpdir, pwd=password.rstrip())
                                 if os.path.isfile(filepath):
                                     self.add_extracted_file(filepath, automatic_analysis=should_analyze)
                                 break
