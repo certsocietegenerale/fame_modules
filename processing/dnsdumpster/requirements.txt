@@ -1,0 +1,3 @@
+tldextract
+requests
+BeautifulSoup4

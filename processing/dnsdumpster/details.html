@@ -1,0 +1,37 @@
+<div class="col-md-12">
+    <div class="card">
+        <div class="header">
+            <h4 class="title">DNSDumpster Report</h4> 
+        </div>
+        <div class="content">
+            <p class="category">DNS Data</p>
+            <div class="labeled_content">
+                <pre><code>{{ results['dns_data'] }}</code></pre>
+            </div>
+
+            {% if 'headers' in results %}
+                <br />
+                <p class="category">Page Headers</p>
+                <div class="labeled_content">
+                    <pre><code>{{ results['headers'] }}</code></pre>
+                </div>
+            {% endif %}
+
+            {% if 'links' in results %}
+                <br />
+                <p class="category">Page Links</p>
+                <div class="labeled_content">
+                    <pre><code>{{ results['links'] }}</code></pre>
+                </div>
+            {% endif %}
+
+            {% if 'reverse_dns' in results %}
+                <br />
+                <p class="category">Reverse DNS</p>
+                <div class="labeled_content">
+                    <pre><code>{{ results['reverse_dns'] }}</code></pre>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
