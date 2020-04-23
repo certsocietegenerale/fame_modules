@@ -2,7 +2,7 @@ import os
 import sys
 from git import Repo
 
-sys.path.append(os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..")))
+sys.path.append(os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "..")))
 
 from fame.common.constants import VENDOR_ROOT
 
