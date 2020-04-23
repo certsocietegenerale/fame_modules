@@ -36,19 +36,19 @@ class DnsDumpster(ProcessingModule):
         {
             'name': 'reverse_dns',
             'type': 'bool',
-            'default': 'false',
+            'default': True,
             'description': 'List reverse DNS entries from DnsDumpster.'
         },
         {
             'name': 'page_links',
             'type': 'bool',
-            'default': 'false',
+            'default': True,
             'description': 'Grab page links using HackerTarget.'
         },
         {
             'name': 'http_headers',
             'type': 'bool',
-            'default': 'false',
+            'default': True,
             'description': 'Grab HTTP server headers from URL using HackerTarget.'
         },
     ]
