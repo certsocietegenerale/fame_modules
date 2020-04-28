@@ -17,7 +17,6 @@ except ImportError:
 class VirusTotalDownload(PreloadingModule):
     name = "virustotal_download"
     description = "Download file from VT and launch new analysis."
-    acts_on = ["hash"]
 
     named_configs = {
         'virustotal': {
@@ -56,7 +55,6 @@ class VirusTotalDownload(PreloadingModule):
                     self.log("warning", "File not found on VirusTotal.")
                 elif response.status_code == 200:
                     self.add_preloaded_file(target, BytesIO(response.raw.read()))
-                    return True
                 else:
                     raise ModuleExecutionError(
                         "Could not download file. Status: {}".format(
@@ -67,5 +65,3 @@ class VirusTotalDownload(PreloadingModule):
                     'VirusTotal config not set up.')
         else:
             self.log("warning", "VirusTotal config not found.")
-
-        return False
