@@ -20,7 +20,7 @@ class VirusTotalDownload(PreloadingModule):
     config = [
         {
             'name': 'api_key',
-            'description': 'VirusTotal API configuration, in order to be able to submit hashes.',
+            'description': 'VirusTotal API key, in order to be able to download files.',
             'type': 'str',
             'value': None
         }
