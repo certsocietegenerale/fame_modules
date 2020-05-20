@@ -16,7 +16,7 @@ except ImportError:
 class OfficePassword(ProcessingModule):
     name = "office_password"
     description = "Decrypt password protected office documents."
-    acts_on = ["word,excel,powerpoint"]
+    acts_on = ["word", "excel", "powerpoint"]
 
     config = [
         {
