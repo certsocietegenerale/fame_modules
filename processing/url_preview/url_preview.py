@@ -1,6 +1,7 @@
 # coding: utf-8
 
 import os
+from shutil import copyfile
 
 from fame.core.module import ProcessingModule, ModuleInitializationError
 from fame.common.utils import tempdir
@@ -12,7 +13,7 @@ class UrlPreview(ProcessingModule):
 
     name = 'url_preview'
     description = 'List all redirections from an URL request and take a screenshot'
-    acts_on = ['url']
+    acts_on = ['url', 'html']
 
     config = [
         {
@@ -63,19 +64,25 @@ class UrlPreview(ProcessingModule):
         # then delete last element
         self.results['target'] = self.results['redirections'].pop()
 
-    def each(self, target):
+    def each_with_type(self, target, filetype):
         self.results = {
             'redirections': [],
             'target': None
         }
 
-        # add http protocol if missing
-        # requests lib needs it
-        if not target.startswith('http'):
-            target = 'http://{}'.format(target)
-
         # Create temporary directory to get results
         self.outdir = tempdir()
+
+        # Check if we're trying to analyze a local html file
+        # if it is, the file is copied to the docker volume
+        if filetype == "html":
+            copyfile(target, os.path.join(self.outdir, "input.html"))
+            target = "file:///data/input.html"
+
+        # add http protocol if missing
+        # requests lib needs it
+        if filetype == "url" and not target.startswith('http'):
+            target = 'http://{}'.format(target)
 
         # output dir
         results_dir = os.path.join(self.outdir, 'output')
