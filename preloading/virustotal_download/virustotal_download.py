@@ -45,7 +45,7 @@ class VirusTotalDownload(PreloadingModule):
         if response.status_code == 400:
             self.log("warning", "API key not valid or file not found.")
         elif response.status_code == 200:
-            self.add_preloaded_file(target, BytesIO(response.raw.read()))
+            self.add_preloaded_file(fd=BytesIO(response.raw.read()))
         else:
             raise ModuleExecutionError(
                 "Could not download file. Status: {}".format(
