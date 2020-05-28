@@ -10,7 +10,7 @@ from ..docker_utils import HAVE_DOCKER, docker_client
 class Extract(ProcessingModule):
     name = "extract"
     description = "Extract most compressed archives (zip, rar, 7z...)"
-    acts_on = ["zip", "rar", "7z"]
+    acts_on = ["zip", "rar", "7z", "iso"]
 
     config = [
         {
