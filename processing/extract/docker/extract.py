@@ -32,7 +32,8 @@ with open("/data/passwords_candidates.txt", "r") as f:
             ar = libarchive.public.file_pour(target, passphrase=password_candidate)
             for entry in ar:
                 entry.get_blocks()
-                entries.append(entry.pathname)
+                if entry.pathname != ".":
+                    entries.append(entry.pathname)
             if len(entries) > 0:
                 password_candidates = password_candidate
                 continue
@@ -46,6 +47,8 @@ if should_extract:
     try:
         ar = libarchive.public.file_pour(target, passphrase=password_candidates)
         for entry in ar:
+            if entry.pathname == ".":
+                continue
             filepath = os.path.join('/data/output/', entry.pathname)
             with open(filepath, "wb") as o:
                 for block in entry.get_blocks():
