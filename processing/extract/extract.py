@@ -39,15 +39,19 @@ class Extract(ProcessingModule):
         return True
 
     def save_output(self, output):
+        namelist = []
         for line in output.splitlines():
             if line.startswith('warning:'):
                 self.results['warnings'].append(line.lstrip('warning: '))
             elif line.startswith('should_analyze:'):
                 filepath = os.path.join(self.results_dir, os.path.basename(line.lstrip('should_analyze: ')))
+                namelist.append(os.path.basename(filepath))
                 if os.path.isfile(filepath):
                     self.add_extracted_file(filepath)
             else:
                 self.log("debug", line)
+
+        self.results['files'] = namelist
 
     def extract(self, file):
         args = '"{}" {} {}'.format(

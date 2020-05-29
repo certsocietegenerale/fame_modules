@@ -29,14 +29,14 @@ with open("/data/passwords_candidates.txt", "r") as f:
     for password_candidate in password_candidates:
         try:
             entries = []
-            ar = libarchive.public.file_pour(target, passphrase=password_candidate)
-            for entry in ar:
-                entry.get_blocks()
-                if entry.pathname != ".":
-                    entries.append(entry.pathname)
-            if len(entries) > 0:
-                password_candidates = password_candidate
-                continue
+            with libarchive.public.file_reader(target, passphrase=password_candidate) as ar:
+                for entry in ar:
+                    entry.get_blocks()
+                    if entry.pathname != ".":
+                        entries.append(entry.pathname)
+                if len(entries) > 0:
+                    password_candidates = password_candidate
+                    continue
         except libarchive.exception.ArchiveError:
             continue
 
@@ -45,16 +45,16 @@ should_analyze = len(entries) <= maximum_automatic_analyses
 
 if should_extract:
     try:
-        ar = libarchive.public.file_pour(target, passphrase=password_candidates)
-        for entry in ar:
-            if entry.pathname == ".":
-                continue
-            filepath = os.path.join('/data/output/', entry.pathname)
-            with open(filepath, "wb") as o:
-                for block in entry.get_blocks():
-                    o.write(block)
-            if os.path.isfile(filepath):
-                print("should_analyze: {}".format(filepath))
+        with libarchive.public.file_reader(target, passphrase=password_candidates) as ar:
+            for entry in ar:
+                if entry.pathname == ".":
+                    continue
+                filepath = os.path.join('/data/output/', entry.pathname)
+                with open(filepath, "wb") as o:
+                    for block in entry.get_blocks():
+                        o.write(block)
+                if os.path.isfile(filepath):
+                    print("should_analyze: {}".format(filepath))
     except libarchive.exception.ArchiveError:
         print("warning: Unable to extract the archive (password not known)")
     if not should_analyze:
