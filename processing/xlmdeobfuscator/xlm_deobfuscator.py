@@ -53,7 +53,7 @@ class XLMDeobfuscator(ProcessingModule):
         if not os.path.isdir(results_dir):
             os.mkdir(results_dir)
 
-        copyfile(target, os.path.join(self.outdir, target))
+        copyfile(target, os.path.join(self.outdir, os.path.basename(target)))
 
         regex_url = r"\w+:(\/\/)[^\s]+"
         reg = re.compile(regex_url)
