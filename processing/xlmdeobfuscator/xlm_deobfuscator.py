@@ -57,7 +57,7 @@ class XLMDeobfuscator(ProcessingModule):
 
         regex_url = r"\w+:(\/\/)[^\s]+"
         reg = re.compile(regex_url)
-        with open(os.path.join(self.results_dir, "results.json")) as results_json:
+        with open(os.path.join(results_dir, "results.json")) as results_json:
             data = json.load(results_json)
             for record in data['records']:
                 self.results["macros"] = self.results["macros"] + "\n" + record['formula']
