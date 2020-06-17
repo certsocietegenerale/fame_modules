@@ -9,14 +9,6 @@ from fame.common.exceptions import ModuleInitializationError
 from ..docker_utils import HAVE_DOCKER, docker_client
 
 
-try:
-    from XLMMacroDeobfuscator.deobfuscator import process_file
-
-    HAVE_XLMMACRODEOBFUSCATOR = True
-except ImportError:
-    HAVE_XLMMACRODEOBFUSCATOR = False
-
-
 def str_reverse(match):
     return match.group(1)[::-1]
 
@@ -27,9 +19,6 @@ class XLMDeobfuscator(ProcessingModule):
     acts_on = ["excel", "xls", "xlsm"]
 
     def initialize(self):
-        if not HAVE_XLMMACRODEOBFUSCATOR:
-            raise ModuleInitializationError(self, "Missing dependency: XLMMacroDeobfuscator")
-
         if not HAVE_DOCKER:
             raise ModuleInitializationError(self, "Missing dependency: docker")
 
