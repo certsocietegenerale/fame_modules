@@ -8,4 +8,4 @@ VOLUME ["/data"]
 
 WORKDIR /data
 
-ENTRYPOINT ["xlmdeobfuscator", "--"]
+ENTRYPOINT ["xlmdeobfuscator"]
