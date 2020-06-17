@@ -40,9 +40,6 @@ class XLMDeobfuscator(ProcessingModule):
     def each(self, target):
         self.results = {
             'macros': u'',
-            'analysis': {
-                'IOC': [],
-            }
         }
 
         self.outdir = temp_volume(target)
@@ -58,6 +55,5 @@ class XLMDeobfuscator(ProcessingModule):
                 self.results["macros"] = self.results["macros"] + "\n" + record['formula']
                 for match in reg.finditer(record['formula']):
                     self.add_ioc(match.group(0))
-                    self.results["analysis"]["IOC"].append({"Potential payload delivery": match.group(0)})
 
         return len(self.results["macros"]) > 0
