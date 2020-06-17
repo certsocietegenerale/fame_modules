@@ -50,7 +50,7 @@ class XLMDeobfuscator(ProcessingModule):
 
         self.run_xlmd(os.path.basename(target))
 
-        regex_url = r"\w+:(\/\/)[^\s]+"
+        regex_url = r"\w+:(\/\/)[^\s\"]+"
         reg = re.compile(regex_url)
         with open(os.path.join(results_dir, "results.json")) as results_json:
             data = json.load(results_json)
@@ -58,6 +58,6 @@ class XLMDeobfuscator(ProcessingModule):
                 self.results["macros"] = self.results["macros"] + "\n" + record['formula']
                 for match in reg.finditer(record['formula']):
                     self.add_ioc(match.group(0))
-                    self.results["analysis"]["IOC"].append(match.group(0))
+                    self.results["analysis"]["IOC"].append({"Potential payload delivery": match.group(0)})
 
         return len(self.results["macros"]) > 0
