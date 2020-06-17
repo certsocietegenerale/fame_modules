@@ -6,9 +6,9 @@
             <p class="category">Detailed Results</p>
         </div>
         <div class="content">
-                {% for type, value in results.analysis['IOC'] %}
+                {% for value in results.analysis['IOC'] %}
                     <div class="close-alert alert alert-warning">
-                        {{type}}: {{value}}
+                        {{value}}
                     </div>
                 {% endfor %}
             <label>Macros</label>
