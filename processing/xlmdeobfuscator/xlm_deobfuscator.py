@@ -26,7 +26,7 @@ class XLMDeobfuscator(ProcessingModule):
 
     def run_xlmd(self, target):
 
-        args = "-f {} -output-formula-format '[[INT-FORMULA]]' --export-json /data/output/results.json".format(
+        args = "--file {} --output-formula-format '[[INT-FORMULA]]' --export-json /data/output/results.json".format(
             target)
 
         # start the right docker
