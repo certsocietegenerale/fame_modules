@@ -6,7 +6,7 @@ from shutil import copyfile
 from fame.core.module import ProcessingModule
 from fame.common.exceptions import ModuleInitializationError
 
-from ..docker_utils import HAVE_DOCKER, docker_client
+from ..docker_utils import HAVE_DOCKER, docker_client, temp_volume
 
 
 def str_reverse(match):
@@ -26,8 +26,7 @@ class XLMDeobfuscator(ProcessingModule):
 
     def run_xlmd(self, target):
 
-        args = "--file {} --output-formula-format '[[INT-FORMULA]]' --export-json /data/output/results.json".format(
-            target)
+        args = "-n --file /data/{} --export-json /data/output/results.json".format(target)
 
         # start the right docker
         return docker_client.containers.run(
@@ -46,14 +45,10 @@ class XLMDeobfuscator(ProcessingModule):
             }
         }
 
-        self.outdir = tempdir()
+        self.outdir = temp_volume(target)
+        results_dir = os.path.join(self.outdir, "output")
 
-        results_dir = os.path.join(self.outdir, 'output')
-
-        if not os.path.isdir(results_dir):
-            os.mkdir(results_dir)
-
-        copyfile(target, os.path.join(self.outdir, os.path.basename(target)))
+        self.run_xlmd(os.path.basename(target))
 
         regex_url = r"\w+:(\/\/)[^\s]+"
         reg = re.compile(regex_url)
