@@ -83,6 +83,9 @@ class UrlPreview(ProcessingModule):
         # requests lib needs it
         if filetype == "url" and not target.startswith('http'):
             target = 'http://{}'.format(target)
+            
+        if filetype == "url":
+            self.add_ioc(target)
 
         # output dir
         results_dir = os.path.join(self.outdir, 'output')
