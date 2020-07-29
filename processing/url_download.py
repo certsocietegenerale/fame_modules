@@ -17,6 +17,7 @@ class URLDownload(ProcessingModule):
     triggered_by = "!"
 
     def each(self, target):
+        self.add_ioc(target)
         response = requests.get(target, stream=True)
 
         if response.status_code == 200:
