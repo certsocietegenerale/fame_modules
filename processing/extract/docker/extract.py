@@ -33,7 +33,7 @@ with open("/data/passwords_candidates.txt", "r") as f:
                 if entry.pathname != ".":
                     entries.append(entry.pathname)
     except libarchive.exception.ArchiveError:
-        continue
+        print("warning: Unable to extract the archive (password not known)")
 
 should_extract = len(entries) <= maximum_extracted_files
 should_analyze = len(entries) <= maximum_automatic_analyses
