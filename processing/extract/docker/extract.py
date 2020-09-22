@@ -28,7 +28,7 @@ with open("/data/passwords_candidates.txt", "r") as f:
 
     try:
         entries = []
-        with libarchive.public.file_reader(target, passphrases=password_candidate) as ar:
+        with libarchive.public.file_reader(target, passphrases=password_candidates) as ar:
             for entry in ar:
                 if entry.pathname != ".":
                     entries.append(entry.pathname)
