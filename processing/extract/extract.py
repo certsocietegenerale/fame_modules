@@ -63,6 +63,7 @@ class Extract(ProcessingModule):
             args,
             volumes={self.outdir: {'bind': '/data', 'mode': 'rw'}},
             stderr=True,
+            stdout=True,
             remove=True
         )
 

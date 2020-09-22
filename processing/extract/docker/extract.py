@@ -26,17 +26,12 @@ with open("/data/passwords_candidates.txt", "r") as f:
     for line in f:
         password_candidates.append(line.strip())
 
-    for password_candidate in password_candidates:
-        try:
-            entries = []
-            with libarchive.public.file_reader(target, passphrase=password_candidate) as ar:
-                for entry in ar:
-                    entry.get_blocks()
-                    if entry.pathname != ".":
-                        entries.append(entry.pathname)
-                if len(entries) > 0:
-                    password_candidates = password_candidate
-                    continue
+    try:
+        entries = []
+        with libarchive.public.file_reader(target, passphrases=password_candidate) as ar:
+            for entry in ar:
+                if entry.pathname != ".":
+                    entries.append(entry.pathname)
         except libarchive.exception.ArchiveError:
             continue
 
@@ -45,7 +40,7 @@ should_analyze = len(entries) <= maximum_automatic_analyses
 
 if should_extract:
     try:
-        with libarchive.public.file_reader(target, passphrase=password_candidates) as ar:
+        with libarchive.public.file_reader(target, passphrases=password_candidates) as ar:
             for entry in ar:
                 if entry.pathname == ".":
                     continue
