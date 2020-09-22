@@ -93,3 +93,9 @@ class Extract(ProcessingModule):
         self.save_output(output)
 
         return True
+
+
+class Zip(Extract):
+    name = "zip"    
+    description = "Extract zip archive content"
+    acts_on = ["zip"]

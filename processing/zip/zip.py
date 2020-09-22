@@ -5,8 +5,8 @@ from fame.core.module import ProcessingModule
 from fame.common.utils import tempdir
 
 
-class Zip(ProcessingModule):
-    name = "zip"
+class LegacyZip(ProcessingModule):
+    name = "legacyzip"
     description = "Extract files from ZIP archive."
     acts_on = "zip"
 
