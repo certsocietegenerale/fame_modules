@@ -20,7 +20,7 @@ target = sys.argv[2]
 maximum_extracted_files = int(sys.argv[3])
 maximum_automatic_analyses = int(sys.argv[4])
 
-password_candidates = [None]
+password_candidates = []
 
 with open("/data/passwords_candidates.txt", "r") as f:
     for line in f:
@@ -32,8 +32,8 @@ with open("/data/passwords_candidates.txt", "r") as f:
             for entry in ar:
                 if entry.pathname != ".":
                     entries.append(entry.pathname)
-        except libarchive.exception.ArchiveError:
-            continue
+    except libarchive.exception.ArchiveError:
+        continue
 
 should_extract = len(entries) <= maximum_extracted_files
 should_analyze = len(entries) <= maximum_automatic_analyses
