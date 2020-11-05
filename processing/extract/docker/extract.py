@@ -52,6 +52,8 @@ if should_extract:
                     print("should_analyze: {}".format(filepath))
     except libarchive.exception.ArchiveError:
         print("warning: Unable to extract the archive (password not known)")
+    except ValueError:
+        print("warning: Unable to extract the archive (password not known ?)")
     if not should_analyze:
         print("warning: Archive contains more than {} files ({}), so no analysis was automatically created.".format(
                 maximum_automatic_analyses, len(entries)))
