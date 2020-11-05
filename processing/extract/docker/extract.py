@@ -20,7 +20,7 @@ target = sys.argv[2]
 maximum_extracted_files = int(sys.argv[3])
 maximum_automatic_analyses = int(sys.argv[4])
 
-password_candidates = []
+password_candidates = [""]
 
 with open("/data/passwords_candidates.txt", "r") as f:
     for line in f:
