@@ -1,4 +1,5 @@
 const puppeteer = require('puppeteer');
+const fse = require('fs-extra');
 var userurl = process.argv[2];
 var userwait = Number(process.argv[3]);
 
@@ -8,6 +9,7 @@ var userwait = Number(process.argv[3]);
   // Page considered as loaded when idle between 2 requests exceed 'user' delay
   function waitForNetworkIdle(page, timeout, maxInflightRequests = 0) {
     // add listeners
+
     page.on('request', onRequestStarted);
     page.on('requestfinished', onRequestFinished);
     page.on('requestfailed', onRequestFinished);
@@ -73,6 +75,8 @@ var userwait = Number(process.argv[3]);
     console.log(error)
   }
 
+  let bodyHTML = await page.evaluate(() => document.body.innerHTML);
+  fse.outputFile("./output/output.html", bodyHTML);
   await page.screenshot({path: './output/output.png'});
 
   await browser.close();

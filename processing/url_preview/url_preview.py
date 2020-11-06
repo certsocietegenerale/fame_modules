@@ -2,12 +2,27 @@
 
 import os
 from shutil import copyfile
+from html.parser import HTMLParser
 
 from fame.core.module import ProcessingModule, ModuleInitializationError
 from fame.common.utils import tempdir
 
 from ..docker_utils import HAVE_DOCKER, docker_client
 
+class MyHTMLParser(HTMLParser):
+    _URLS = []
+    def handle_starttag(self, tag, attrs):
+        if tag == "a":
+            for attr in attrs:
+                if attr[0].lower() == "href" and (attr[1].lower().startswith("http") or attr[1].lower().startswith("ftp")):
+                    self._URLS.append(attr[1])
+        if tag == "form":
+            for attr in attrs:
+                if attr[0].lower() == "action" and (attr[1].lower().startswith("http") or attr[1].lower().startswith("ftp")):
+                    self._URLS.append(attr[1])
+
+    def get_urls(self):
+        return self._URLS
 
 class UrlPreview(ProcessingModule):
 
@@ -101,6 +116,12 @@ class UrlPreview(ProcessingModule):
 
         # save preview image
         screenshot = self.save_preview(results_dir)
+
+        with open(os.path.join(results_dir, "output.html")) as f:
+            parser = MyHTMLParser()
+            parser.feed(f.read())
+            for url in parser.get_urls():
+                self.add_ioc(url)
 
         if len(self.results['redirections']) > 0:
             # save redirections as observable
