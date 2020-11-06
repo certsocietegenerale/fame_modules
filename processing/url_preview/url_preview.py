@@ -20,6 +20,14 @@ class MyHTMLParser(HTMLParser):
             for attr in attrs:
                 if attr[0].lower() == "action" and (attr[1].lower().startswith("http") or attr[1].lower().startswith("ftp")):
                     self._URLS.append(attr[1])
+        if tag == "meta":
+            for attr in attrs:
+                if attr[0].lower() == "http-equiv":
+                    for att in attrs:
+                        if att[0].lower() == "content":
+                            url = att[1].split("=")
+                            if len(url) > 1 and (url[1].lower().startswith("http") or url[1].lower().startswith("ftp")):
+                                self._URLS.append(url[1])
 
     def get_urls(self):
         return self._URLS
