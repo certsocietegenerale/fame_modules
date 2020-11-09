@@ -12,6 +12,7 @@ from ..docker_utils import HAVE_DOCKER, docker_client
 class MyHTMLParser(HTMLParser):
 
     def __init__(self):
+        HTMLParser.__init__(self)
         self._URLS = []
 
     def handle_starttag(self, tag, attrs):
