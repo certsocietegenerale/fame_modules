@@ -10,7 +10,10 @@ from fame.common.utils import tempdir
 from ..docker_utils import HAVE_DOCKER, docker_client
 
 class MyHTMLParser(HTMLParser):
-    _URLS = []
+
+    def __init__(self):
+        self._URLS = []
+
     def handle_starttag(self, tag, attrs):
         if tag == "a":
             for attr in attrs:
