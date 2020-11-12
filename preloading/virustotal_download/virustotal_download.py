@@ -42,8 +42,10 @@ class VirusTotalDownload(PreloadingModule):
             params=params, stream=True
         )
 
-        if response.status_code == 400:
-            self.log("warning", "API key not valid or file not found.")
+        if response.status_code == 403:
+            raise ModuleExecutionError('VirusTotal API Key required')
+        elif response.status_code == 404:
+            self.log("warning", "File not found on VirusTotal.")
         elif response.status_code == 200:
             self.add_preloaded_file(fd=BytesIO(response.raw.read()))
         else:

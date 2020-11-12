@@ -67,16 +67,20 @@ class UrlPreview(ProcessingModule):
             return False
 
     def preview(self, url):
-        args = 'node {} {} {}'.format(
+        data_folder_path = os.path.dirname(self.outdir)
+        volumes = {data_folder_path: {'bind': '/data', 'mode': 'rw'}}
+
+        args = "node {} '{}' {}".format(
             '/script.js', url, self.network_idle_timeout)
 
         # start the right docker
         return docker_client.containers.run(
             'fame/url_preview',
             args,
-            volumes={self.outdir: {'bind': '/data', 'mode': 'rw'}},
+            volumes=volumes,
             stderr=True,
-            remove=True
+            remove=True,
+            working_dir=os.path.join("/data", data_folder_path)
         )
 
     def save_output(self, output):
@@ -100,6 +104,9 @@ class UrlPreview(ProcessingModule):
         # Create temporary directory to get results
         self.outdir = tempdir()
 
+        if type(target) is bytes:
+            target = target.decode("utf8")
+
         # Check if we're trying to analyze a local html file
         # if it is, the file is copied to the docker volume
         if filetype == "html":
@@ -110,7 +117,7 @@ class UrlPreview(ProcessingModule):
         # requests lib needs it
         if filetype == "url" and not target.startswith('http'):
             target = 'http://{}'.format(target)
-            
+
         if filetype == "url":
             self.add_ioc(target)
 
@@ -122,6 +129,8 @@ class UrlPreview(ProcessingModule):
 
         # execute docker container
         output = self.preview(target)
+        if type(output) is bytes:
+            output = output.decode()
 
         # save log output from dockerized app, extract potential redirections
         self.save_output(output)

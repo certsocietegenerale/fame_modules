@@ -57,15 +57,22 @@ class DocumentPreview(ProcessingModule):
         return extracted_images
 
     def preview(self, target, target_type):
+        target = os.path.join(
+            os.path.basename(self.outdir),
+            os.path.basename(target)
+        )
 
-        args = u"--target \"{}\" --target_type {} --max_pages {}".format(
-            os.path.basename(target), target_type, self.max_pages)
+        args = "--target \"{}\" --target_type {} --max_pages {}".format(
+            target, target_type, self.max_pages)
+
+        data_folder_path = os.path.dirname(self.outdir)
+        volumes = {data_folder_path: {'bind': '/data', 'mode': 'rw'}}
 
         # start the right docker
         return docker_client.containers.run(
             'fame/document_preview',
             args,
-            volumes={self.outdir: {'bind': '/data', 'mode': 'rw'}},
+            volumes=volumes,
             stderr=True,
             remove=True
         )
@@ -78,6 +85,8 @@ class DocumentPreview(ProcessingModule):
 
         # Execute pre-viewing on target
         output = self.preview(target, target_type)
+        if type(output) is bytes:
+            output = output.decode()
 
         # save log output from dockerized app
         self.save_output(output)

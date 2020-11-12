@@ -61,7 +61,7 @@ class Yeti(ThreatIntelligenceModule):
                 break
 
         for result in results['matches']:
-            if result['observable'] == ioc:
+            if result['observable']['value'] == ioc:
                 indicators.append({
                     'name': result['name'],
                     'description': result['description']
