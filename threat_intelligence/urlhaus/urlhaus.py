@@ -74,7 +74,7 @@ class Urlhaus(ThreatIntelligenceModule):
                 'submission': submission
             }
             r = self._urlhaus_request(json_data)
-            print("[URLhaus] Submission status: " + r.text)
+            print(("[URLhaus] Submission status: " + r.text))
 
     def _urlhaus_request(self, json_data):
 
