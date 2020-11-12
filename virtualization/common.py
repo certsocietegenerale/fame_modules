@@ -1,3 +1,5 @@
+from time import sleep
+
 from fame.common.exceptions import ModuleInitializationError, ModuleExecutionError
 from fame.core.module import VirtualizationModule
 
@@ -19,11 +21,15 @@ class LibvirtVirtualization(VirtualizationModule):
 
         return True
 
-    def prepare(self):
+    def prepare(self, wait_for_vm_available=False):
         self.con = libvirt.open(self.connection_string)
 
         try:
             self.vm = self.con.lookupByName(self.vm_label)
+
+            while wait_for_vm_available and (self.is_running() or self._state() == libvirt.VIR_DOMAIN_PAUSED):
+                sleep(3)
+
             VirtualizationModule.prepare(self)
         finally:
             self.con.close()
