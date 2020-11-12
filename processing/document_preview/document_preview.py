@@ -62,11 +62,11 @@ class DocumentPreview(ProcessingModule):
             os.path.basename(target)
         )
 
-        args = "--target \"{}\" --target_type {} --max_pages {}".format(
-            target, target_type, self.max_pages)
-
         data_folder_path = os.path.dirname(self.outdir)
         volumes = {data_folder_path: {'bind': '/data', 'mode': 'rw'}}
+
+        args = "--target \"{}\" --target_type {} --max_pages {}".format(
+            target, target_type, self.max_pages)
 
         # start the right docker
         return docker_client.containers.run(
