@@ -21,7 +21,7 @@ except ImportError:
 def file_sha256(filepath):
     sha256 = hashlib.sha256()
 
-    with open(filepath, 'r') as f:
+    with open(filepath, 'rb') as f:
         while True:
             data = f.read(1000000)
             if not data:
@@ -126,7 +126,7 @@ class Peepdf(ProcessingModule):
             self.extract_link(obj)
             self.extract_javascript(pdf, obj, version)
 
-            for element in obj.elements.values():
+            for element in list(obj.elements.values()):
                 self.walk_objects(pdf, element, version)
         elif isinstance(obj, peepdf.PDFCore.PDFArray):
             for element in obj.elements:
@@ -148,7 +148,7 @@ class Peepdf(ProcessingModule):
                             ))
 
     def get_object(self, pdf, object_id):
-        return pdf.getObject(object_id).getValue().decode('utf-8', errors='replace')
+        return pdf.getObject(object_id).getValue()
 
     def extract_objects(self, pdf):
         for element_type in [
@@ -199,8 +199,8 @@ class Peepdf(ProcessingModule):
         if result:
             raise ModuleExecutionError('error during PDF parsing: {}'.format(result))
 
-        for version in xrange(pdf.updates + 1):
-            for obj in pdf.body[version].objects.values():
+        for version in range(pdf.updates + 1):
+            for obj in list(pdf.body[version].objects.values()):
                 self.extract_attachments(pdf, obj, version)
                 self.walk_objects(pdf, obj, version)
 

@@ -1,4 +1,4 @@
-import StringIO
+import io
 from importlib import import_module
 
 from fame.common.utils import iterify
@@ -111,7 +111,7 @@ class Volatility(ProcessingModule):
         # Create Volatility API configuration
         self._volconfig = conf.ConfObject()
         self._volconfig.optparser.set_conflict_handler("resolve")
-        for key, value in base_conf.items():
+        for key, value in list(base_conf.items()):
             self._volconfig.update(key, value)
 
         # Get all available plugins
@@ -170,7 +170,7 @@ class Volatility(ProcessingModule):
         data = plugin.calculate()
 
         # Get normal output in string
-        outfd = StringIO.StringIO()
+        outfd = io.StringIO()
         plugin.render_text(outfd, data)
         result = outfd.getvalue()
         outfd.close()

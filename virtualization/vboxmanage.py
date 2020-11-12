@@ -60,7 +60,7 @@ class VBoxManage(VirtualizationModule):
     def _state(self, to_print=False):
         output = self._vbox("showvminfo", self.vm_label, "--machinereadable")
         if to_print:
-            print output
+            print(output)
 
         for line in output.splitlines():
             if line.startswith('VMState="'):

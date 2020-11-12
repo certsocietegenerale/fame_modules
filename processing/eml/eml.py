@@ -28,7 +28,7 @@ class EML(ProcessingModule):
         headers = os.path.join(outdir, '__headers.txt')
 
         with open(headers, 'w') as f:
-            f.write(self.headers_string(msg.items()))
+            f.write(self.headers_string(list(msg.items())))
 
         self.register_files('email_headers', headers)
 

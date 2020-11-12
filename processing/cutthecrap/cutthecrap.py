@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+
 
 import threading
 from time import time
@@ -89,7 +89,7 @@ class ClickThread(threading.Thread):
             for window in self.to_close:
                 if window in title:
                     win32gui.PostMessage(hwnd, win32con.WM_CLOSE, 0, 0)
-                    print "Closed window ({})".format(title)
+                    print("Closed window ({})".format(title))
 
             for window in self.clicks:
                 if window in title:
@@ -101,14 +101,14 @@ class ClickThread(threading.Thread):
                     try:
                         win32gui.EnumChildWindows(hwnd, self.foreach_child(), hwnd)
                     except:
-                        print "EnumChildWindows failed, moving on."
+                        print("EnumChildWindows failed, moving on.")
 
                     for button_toclick in self._windows[hwnd]['to_click']:
                         for button in self._windows[hwnd]['buttons']:
                             if button_toclick in button['text']:
                                 win32gui.SetForegroundWindow(button['handle'])
                                 win32gui.SendMessage(button['handle'], win32con.BM_CLICK, 0, 0)
-                                print "Clicked on button ({} / {})".format(title, button['text'])
+                                print("Clicked on button ({} / {})".format(title, button['text']))
 
                     del self._windows[hwnd]
 
@@ -219,7 +219,7 @@ class CutTheCrap(IsolatedProcessingModule, EventHandler):
             while debug and time() < maxtime:
                 try:
                     debug.wait(1000)
-                except WindowsError, e:
+                except WindowsError as e:
                     if e.winerror in (win32.ERROR_SEM_TIMEOUT,
                                       win32.WAIT_TIMEOUT):
                         continue

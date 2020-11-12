@@ -25,7 +25,7 @@ class OfficeMacros(ProcessingModule):
 
     def each(self, target):
         self.results = {
-            'macros': u'',
+            'macros': '',
             'analysis': {
                 'AutoExec': [],
                 'Suspicious': [],
@@ -45,11 +45,11 @@ class OfficeMacros(ProcessingModule):
 
         # extract all macros code
         for (_, _, _, vba_code) in vba.extract_all_macros():
-            self.results['macros'] += vba_code.decode('utf-8', errors='replace') + '\n'
+            self.results['macros'] += vba_code + '\n'
 
         # extract all form strings
         for (_, _, form_string) in vba.extract_form_strings():
-            self.results['analysis']['Form String'].append(form_string.decode('utf-8', errors='replace'))
+            self.results['analysis']['Form String'].append(form_string)
 
         # extract all analysis
         if analysis:
@@ -60,7 +60,7 @@ class OfficeMacros(ProcessingModule):
                     if olevba.is_printable(keyword):
                         keyword = keyword.replace('"', '""')
                         self.results['macros'] = self.results['macros'].replace(description, '"%s"' % keyword)
-                        self.results['analysis'][kw_type].append((keyword.decode('utf-8', errors='replace'), description.decode('utf-8', errors='replace')))
+                        self.results['analysis'][kw_type].append((keyword, description))
                 else:
                     self.results['analysis'][kw_type].append((keyword, description))
 

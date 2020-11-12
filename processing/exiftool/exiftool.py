@@ -48,6 +48,8 @@ File Permissions""",
             self.parse_output(e.stderr)
 
     def parse_output(self, out):
+        out = out.decode('utf-8', errors='replace')
+
         # Parse output
         for line in out.splitlines():
             parts = line.split(':')

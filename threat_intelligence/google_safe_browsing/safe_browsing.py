@@ -1,6 +1,6 @@
 # coding: utf-8
 import re
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 from fame.common.exceptions import ModuleInitializationError
 from fame.core.module import ThreatIntelligenceModule
@@ -152,7 +152,7 @@ class SafeBrowsingUpdateAPI(ThreatIntelligenceModule):
         # Make sure we only request information on URLs
         if re.match(self.url_regex, ioc):
             # percent encoding (url)
-            encoded_ioc = urllib.quote(ioc, safe='')
+            encoded_ioc = urllib.parse.quote(ioc, safe='')
 
             # request local db (docker)
             # https://github.com/mlsecproject/gglsbl-rest
