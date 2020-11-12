@@ -1,6 +1,6 @@
 import gzip
 import json
-from cStringIO import StringIO
+from io import BytesIO
 from . import APKPlugin
 
 try:
@@ -52,7 +52,7 @@ class Z3Core(APKPlugin):
         c2 = []
         f = self.zipfile.open(bundle)
         data = f.read()
-        f = StringIO(data)
+        f = BytesIO(data)
         elffile = ELFFile(f)
         section = elffile.get_section_by_name('.dynsym')
         for symbol in section.iter_symbols():
@@ -60,7 +60,7 @@ class Z3Core(APKPlugin):
                 if symbol.name[14:] in self.WHITELISTED_DLL:
                     continue
                 dll_data = data[symbol['st_value']:symbol['st_value'] + symbol['st_size']]
-                dll_data = gzip.GzipFile(fileobj=StringIO(dll_data)).read()
+                dll_data = gzip.GzipFile(fileobj=BytesIO(dll_data)).read()
                 regexp = """rule find_url {
                             strings:
                             $url = /http:\/\/[A-Za-z0-9\.\/$\-_+!\*'(),]*/ wide

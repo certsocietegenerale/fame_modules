@@ -49,14 +49,14 @@ if should_extract:
                     for block in entry.get_blocks():
                         o.write(block)
                 if os.path.isfile(filepath):
-                    print("should_analyze: {}".format(filepath))
+                    print(("should_analyze: {}".format(filepath)))
     except libarchive.exception.ArchiveError:
         print("warning: Unable to extract the archive (password not known)")
     except ValueError:
         print("warning: Unable to extract the archive (password not known ?)")
     if not should_analyze:
-        print("warning: Archive contains more than {} files ({}), so no analysis was automatically created.".format(
-                maximum_automatic_analyses, len(entries)))
+        print(("warning: Archive contains more than {} files ({}), so no analysis was automatically created.".format(
+                maximum_automatic_analyses, len(entries))))
 else:
-    print("warning: Archive contains more than {} files ({}), so they were not extracted.".format(
-            maximum_extracted_files, len(entries)))
+    print(("warning: Archive contains more than {} files ({}), so they were not extracted.".format(
+            maximum_extracted_files, len(entries))))

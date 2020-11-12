@@ -17,11 +17,11 @@ from fame.core.module import ProcessingModule, ModuleInitializationError
 
 def decode_mime_words(s):
     if s:
-        return u''.join(
+        return ''.join(
             word.decode(encoding or 'utf8') if isinstance(word, bytes) else word
             for word, encoding in email.Header.decode_header(s))
     else:
-        return u''
+        return ''
 
 
 def list_config(string):
@@ -104,8 +104,8 @@ class EmailHeader(ProcessingModule):
                     line = received[i].split(';')
                 else:
                     line = received[i].split('\r\n')
-                line = map(str.strip, line)
-                line = map(lambda x: x.replace('\r\n', ''), line)
+                line = list(map(str.strip, line))
+                line = [x.replace('\r\n', '') for x in line]
 
                 org_time = self.parse_date(line[1])
 
@@ -133,7 +133,7 @@ class EmailHeader(ProcessingModule):
                             |id
                         )""", line[0], re.DOTALL | re.X)
 
-                data = map(lambda x: x.replace('\n', ' '), map(str.strip, data[0]))
+                data = [x.replace('\n', ' ') for x in list(map(str.strip, data[0]))]
                 timeline = [{
                     'order': str(index-1),
                     'delay': '',
@@ -198,11 +198,11 @@ class EmailHeader(ProcessingModule):
 
         # Parse Received and Authentication Headers
         self.results['Received'] = self.parse_received(parsed_headers.get_all('Received'))
-        self.results['DKIM'] = self.parse_dkim(parsed_headers.items())
-        self.results['SPF'] = self.parse_spf(parsed_headers.items())
-        self.results['DMARC'] = self.parse_dmarc(parsed_headers.items())
+        self.results['DKIM'] = self.parse_dkim(list(parsed_headers.items()))
+        self.results['SPF'] = self.parse_spf(list(parsed_headers.items()))
+        self.results['DMARC'] = self.parse_dmarc(list(parsed_headers.items()))
 
-        self.results['headers'] = parsed_headers.items()
+        self.results['headers'] = list(parsed_headers.items())
         self.results['highlight'] = self.highlight
 
         return True

@@ -60,6 +60,8 @@ File Permissions""",
             self.parse_output(e.stderr)
 
     def parse_output(self, out):
+        out = out.decode('utf-8', errors='replace')
+
         # Parse output
         if type(out) is bytes:
             out = out.decode()

@@ -67,7 +67,7 @@ class LegacyZip(ProcessingModule):
                             except RuntimeError:
                                 pass
                         else:
-                            self.results['warnings'].append(u'Could not extract {} (password not known)'.format(name))
+                            self.results['warnings'].append('Could not extract {} (password not known)'.format(name))
 
                 if not should_analyze:
                     self.results['warnings'].append(

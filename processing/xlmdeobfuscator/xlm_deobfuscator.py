@@ -39,7 +39,7 @@ class XLMDeobfuscator(ProcessingModule):
 
     def each(self, target):
         self.results = {
-            'macros': u''
+            'macros': ''
         }
 
         self.outdir = temp_volume(target)

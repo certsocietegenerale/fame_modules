@@ -1,7 +1,7 @@
 import os
 import time
-from urlparse import urljoin
-from urllib import urlopen
+from urllib.parse import urljoin
+from urllib.request import urlopen
 
 try:
     import requests
