@@ -16,31 +16,31 @@ class EML(ProcessingModule):
     acts_on = "eml"
 
     def headers_string(self, header):
-        header_string = ''
+        header_string = ""
 
         for part in header:
-            header_string += '{}: {}\n'.format(part[0], part[1])
+            header_string += "{}: {}\n".format(part[0], part[1])
 
         return header_string
 
     def register_headers(self, msg, outdir):
         # Create a temporary output dir
-        headers = os.path.join(outdir, '__headers.txt')
+        headers = os.path.join(outdir, "__headers.txt")
 
-        with open(headers, 'w') as f:
+        with open(headers, "w") as f:
             f.write(self.headers_string(list(msg.items())))
 
-        self.register_files('email_headers', headers)
+        self.register_files("email_headers", headers)
 
     def extract_urls(self, mail):
         regex_url = r"\w+:(\/\/)[^\s>\"\'\"]+"
         reg = re.compile(regex_url)
-        content = quopri.decodestring(mail.as_string())
+        content = quopri.decodestring(mail.as_string()).decode("utf-8", errors="replace")
         for match in reg.finditer(content):
             self.add_ioc(match.group(0))
 
     def each(self, target):
-        with open(target, 'r') as f:
+        with open(target, "r") as f:
             msg = email.message_from_file(f)
 
         outdir = tempdir()
@@ -53,24 +53,24 @@ class EML(ProcessingModule):
         counter = 1
         for part in msg.walk():
             # multipart/* are just containers
-            if part.get_content_maintype() == 'multipart':
+            if part.get_content_maintype() == "multipart":
                 continue
 
-            content_disposition = part.get('Content-Disposition', None)
-            if content_disposition and 'attachment' in content_disposition:
+            content_disposition = part.get("Content-Disposition", None)
+            if content_disposition and "attachment" in content_disposition:
                 filename = part.get_filename()
                 if not filename:
                     ext = mimetypes.guess_extension(part.get_content_type())
 
                     if not ext:
                         # Use a generic bag-of-bits extension
-                        ext = '.bin'
+                        ext = ".bin"
 
-                    filename = 'part-{}{}'.format(counter, ext)
+                    filename = "part-{}{}".format(counter, ext)
                     counter += 1
 
                 filepath = os.path.join(outdir, filename)
-                with open(filepath, 'wb') as out:
+                with open(filepath, "wb") as out:
                     out.write(part.get_payload(decode=True))
 
                 self.add_extracted_file(filepath)
