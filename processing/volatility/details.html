@@ -7,10 +7,13 @@
         <div class="content">
             {% for match in results %}
             <div class="row">
-            	<div class="col-sm-3">
-            		{{match.rule}} ({{match.owner}})
-            	</div>
-            	<div class="col-sm-9">
+            	<div class="col-sm-2">
+            		{{match.rule}} ({{match.variable}})
+                </div>
+                <div class="col-sm-2">
+                    {{match.owner}} ({{match.pid}})
+                </div>
+            	<div class="col-sm-8">
             		<pre>{{match.hexdump}}</pre>
             	</div>
             </div>
