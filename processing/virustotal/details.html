@@ -40,7 +40,7 @@
                                 <tr>
                                     <td>{{engine}}</td>
                                     <td>{{results['scans'][engine]['result']}}</td>
-                                    <td>{{results['scans'][engine]['update']}}</td>
+                                    <td>{{results['scans'][engine].get('update', '')}}</td>
                                 </tr>
                             {% endif %}
                         {% endfor %}
