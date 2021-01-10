@@ -1,8 +1,6 @@
 import re
 import os
 import json
-from fame.common.utils import tempdir
-from shutil import copyfile
 from fame.core.module import ProcessingModule
 from fame.common.exceptions import ModuleInitializationError
 
@@ -26,21 +24,19 @@ class XLMDeobfuscator(ProcessingModule):
 
     def run_xlmd(self, target):
 
-        args = "-n --file /data/{} --export-json /data/output/results.json".format(target)
+        args = "-n --file '/data/{}' --export-json /data/output/results.json".format(target)
 
         # start the right docker
         return docker_client.containers.run(
-            'fame/xlmdeobfuscator',
+            "fame/xlmdeobfuscator",
             args,
-            volumes={self.outdir: {'bind': '/data', 'mode': 'rw'}},
+            volumes={self.outdir: {"bind": "/data", "mode": "rw"}},
             stderr=True,
-            remove=True
+            remove=True,
         )
 
     def each(self, target):
-        self.results = {
-            'macros': ''
-        }
+        self.results = {"macros": ""}
 
         self.outdir = temp_volume(target)
         results_dir = os.path.join(self.outdir, "output")
@@ -51,9 +47,9 @@ class XLMDeobfuscator(ProcessingModule):
         reg = re.compile(regex_url)
         with open(os.path.join(results_dir, "results.json")) as results_json:
             data = json.load(results_json)
-            for record in data['records']:
-                self.results["macros"] = self.results["macros"] + "\n" + record['formula']
-                for match in reg.finditer(record['formula']):
+            for record in data["records"]:
+                self.results["macros"] = self.results["macros"] + "\n" + record["formula"]
+                for match in reg.finditer(record["formula"]):
                     self.add_ioc(match.group(0))
 
         return len(self.results["macros"]) > 0
