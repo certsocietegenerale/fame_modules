@@ -1,2 +1,1 @@
-msoffcrypto-tool
-
+msoffcrypto-tool==4.11.0

@@ -1,1 +1,1 @@
-oletools
+oletools==0.56
