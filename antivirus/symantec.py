@@ -56,7 +56,7 @@ class Symantec(AntivirusModule):
         s.get(self.submission_url)
         filename = os.path.basename(file)
 
-        with open(file, 'r') as f:
+        with open(file, 'r+b') as f:
             params = {
                 'mode': "2",
                 'fname': self.first_name,
