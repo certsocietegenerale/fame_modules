@@ -21,19 +21,19 @@ maximum_extracted_files = int(sys.argv[3])
 maximum_automatic_analyses = int(sys.argv[4])
 
 password_candidates = [""]
+entries = []
 
-with open("/data/passwords_candidates.txt", "r") as f:
-    for line in f:
-        password_candidates.append(line.strip())
-
-    try:
-        entries = []
-        with libarchive.public.file_reader(target, passphrases=password_candidates) as ar:
-            for entry in ar:
-                if entry.pathname != ".":
-                    entries.append(entry.pathname)
-    except libarchive.exception.ArchiveError:
-        print("warning: Unable to extract the archive (password not known)")
+if os.path.exists("/data/passwords_candidates.txt"):
+    with open("/data/passwords_candidates.txt", "r") as f:
+        for line in f:
+            password_candidates.append(line.strip())
+try:
+    with libarchive.public.file_reader(target, passphrases=password_candidates) as ar:
+        for entry in ar:
+            if entry.pathname != ".":
+                entries.append(entry.pathname)
+except libarchive.exception.ArchiveError:
+    print("Cannot read archive content")
 
 should_extract = len(entries) <= maximum_extracted_files
 should_analyze = len(entries) <= maximum_automatic_analyses
@@ -45,6 +45,9 @@ if should_extract:
                 if entry.pathname == ".":
                     continue
                 filepath = os.path.join('/data/output/', entry.pathname)
+                dirname = os.path.dirname(filepath)
+                if not os.path.exists(dirname):
+                    os.makedirs(dirname)
                 with open(filepath, "wb") as o:
                     for block in entry.get_blocks():
                         o.write(block)
