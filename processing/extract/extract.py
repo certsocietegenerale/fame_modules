@@ -44,7 +44,7 @@ class Extract(ProcessingModule):
             if line.startswith('warning:'):
                 self.results['warnings'].append(line.lstrip('warning: '))
             elif line.startswith('should_analyze:'):
-                filepath = os.path.join(self.results_dir, os.path.basename(line.lstrip('should_analyze: ')))
+                filepath = os.path.join(self.results_dir, line.lstrip('should_analyze:  /data/output/'))
                 namelist.append(os.path.basename(filepath))
                 if os.path.isfile(filepath):
                     self.add_extracted_file(filepath)
