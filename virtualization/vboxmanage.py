@@ -14,7 +14,7 @@ class VBoxManage(VirtualizationModule):
     def initialize(self, vm, base_url, snapshot=None):
         VirtualizationModule.initialize(self, vm, base_url, snapshot)
 
-        if find_executable('VBoxManage') is None:
+        if find_executable("VBoxManage") is None:
             raise ModuleInitializationError(self, "Missing dependency: VBoxManage")
 
         return True
@@ -43,10 +43,16 @@ class VBoxManage(VirtualizationModule):
         # a little, so we are waiting for 'SessionName' to disapear from the
         # vminfo.
         def session_ended():
-            return 'SessionName="' not in self._vbox("showvminfo", self.vm_label, "--machinereadable")
+            return 'SessionName="' not in self._vbox(
+                "showvminfo", self.vm_label, "--machinereadable"
+            )
 
         if with_timeout(session_ended, timedelta(seconds=30), 0.5) is None:
-            raise ModuleExecutionError('Timeout while waiting for machine "{}" to poweroff properly.'.format(self.vm_label))
+            raise ModuleExecutionError(
+                'Timeout while waiting for machine "{}" to poweroff properly.'.format(
+                    self.vm_label
+                )
+            )
 
     def _wait_for_completion(self, state):
         state = iterify(state)
@@ -55,7 +61,11 @@ class VBoxManage(VirtualizationModule):
             return self._state() in state
 
         if with_timeout(correct_state, timedelta(seconds=120), 0.5) is None:
-            raise ModuleExecutionError('Timeout while waiting for machine "{}" to be "{}"'.format(self.vm_label, self.state))
+            raise ModuleExecutionError(
+                'Timeout while waiting for machine "{}" to be "{}"'.format(
+                    self.vm_label, self.state
+                )
+            )
 
     def _state(self, to_print=False):
         output = self._vbox("showvminfo", self.vm_label, "--machinereadable")
@@ -66,10 +76,12 @@ class VBoxManage(VirtualizationModule):
             if line.startswith('VMState="'):
                 return line[9:-1]
 
-        raise ModuleExecutionError('Could not determine machine state for "{}"'.format(self.vm_label))
+        raise ModuleExecutionError(
+            'Could not determine machine state for "{}"'.format(self.vm_label)
+        )
 
     def _vbox(self, *args):
         p = Popen(["VBoxManage"] + list(args), stdout=PIPE, stderr=PIPE, close_fds=True)
         output, error = p.communicate()
 
-        return output
+        return output.decode("utf-8", errors="ignore")
