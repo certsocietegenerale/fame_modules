@@ -336,7 +336,7 @@ Interceptor.replace(
 
 class CutTheCrap(IsolatedProcessingModule):
     name = "cutthecrap"
-    description = "Dropper analysis using WinDbg."
+    description = "Dropper analysis using Frida."
     acts_on = ["word", "html", "powerpoint", "excel", "javascript", "rtf", "vbscript"]
 
     config = [
