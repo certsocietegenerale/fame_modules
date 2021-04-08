@@ -32,8 +32,12 @@ class APK(ProcessingModule):
             self.results['main_activity'] = apk.get_main_activity()
             self.results['receivers'] = apk.get_receivers()
             self.results['services'] = apk.get_services()
-            self.results['main_activity_content'] = vm.get_class("L{};".format(self.results['main_activity']).replace('.', '/')).get_source()
-        except:
+
+            for cls in vm_analysis.get_classes():
+                cls = cls.get_vm_class()
+                if f"L{self.results['main_activity'].replace('.', '/')};".lower() in cls.get_name().lower():
+                    self.results['main_activity_content'] = cls.get_source()
+        except Exception:
             apk = None
             vm, vm_analysis = AnalyzeDex(target)
             self.results['dex'] = True

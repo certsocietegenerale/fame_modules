@@ -5,7 +5,8 @@ import time
 import mimetypes
 from zipfile import ZipFile, BadZipfile
 from shutil import copyfileobj
-from urllib import urlopen, urlencode
+from urllib.request import urlopen
+from urllib.parse import urlencode
 
 from fame.core.module import ProcessingModule
 from fame.common.utils import tempdir

@@ -58,7 +58,7 @@ class DocumentPreview(ProcessingModule):
 
     def preview(self, target, target_type):
 
-        args = u"--target \"{}\" --target_type {} --max_pages {}".format(
+        args = "--target \"{}\" --target_type {} --max_pages {}".format(
             os.path.basename(target), target_type, self.max_pages)
 
         # start the right docker

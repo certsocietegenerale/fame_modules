@@ -17,20 +17,20 @@ class Extract(ProcessingModule):
             "name": "password_candidates",
             "type": "text",
             "default": "virus\ninfected",
-            "description": "List of passwords to try when unpacking an encrypted archive file (one per line)."
+            "description": "List of passwords to try when unpacking an encrypted archive file (one per line).",
         },
         {
             "name": "maximum_extracted_files",
             "type": "integer",
             "default": 5,
-            "description": "If there are more files than this value in the archive, files will not be extracted."
+            "description": "If there are more files than this value in the archive, files will not be extracted.",
         },
         {
             "name": "maximum_automatic_analyses",
             "type": "integer",
             "default": 1,
-            "description": "If there are more files than this value in the archive, no analyses will be automatically created for extracted files."
-        }
+            "description": "If there are more files than this value in the archive, no analyses will be automatically created for extracted files.",
+        },
     ]
 
     def initialize(self):
@@ -41,41 +41,43 @@ class Extract(ProcessingModule):
     def save_output(self, output):
         namelist = []
         for line in output.splitlines():
-            if line.startswith('warning:'):
-                self.results['warnings'].append(line.lstrip('warning: '))
-            elif line.startswith('should_analyze:'):
-                filepath = os.path.join(self.results_dir, line.lstrip('should_analyze:  /data/output/'))
+            if line.startswith("warning:"):
+                self.results["warnings"].append(line.lstrip("warning: "))
+            elif line.startswith("should_analyze:"):
+                filepath = os.path.join(self.results_dir, line.lstrip("should_analyze:  /data/output/"))
                 namelist.append(os.path.basename(filepath))
                 if os.path.isfile(filepath):
                     self.add_extracted_file(filepath)
             else:
                 self.log("debug", line)
 
-        self.results['files'] = namelist
+        self.results["files"] = namelist
 
     def extract(self, file):
-        args = '"{}" {} {}'.format(
-            file, self.maximum_extracted_files, self.maximum_automatic_analyses)
+        args = '"{}" {} {}'.format(file, self.maximum_extracted_files, self.maximum_automatic_analyses)
 
         # start the right docker
-        return docker_client.containers.run(
-            'fame/extract',
+        output = docker_client.containers.run(
+            "fame/extract",
             args,
-            volumes={self.outdir: {'bind': '/data', 'mode': 'rw'}},
+            volumes={self.outdir: {"bind": "/data", "mode": "rw"}},
             stderr=True,
             stdout=True,
-            remove=True
+            remove=True,
         )
 
+        if type(output) is bytes:
+            output = output.decode("utf-8", errors="replace")
+
+        return output
+
     def each(self, target):
-        self.results = {
-            'warnings': []
-        }
+        self.results = {"warnings": []}
 
         # Create temporary directory to get results
         self.outdir = tempdir()
 
-        self.results_dir = os.path.join(self.outdir, 'output')
+        self.results_dir = os.path.join(self.outdir, "output")
 
         if not os.path.isdir(self.results_dir):
             os.mkdir(self.results_dir)
@@ -96,6 +98,6 @@ class Extract(ProcessingModule):
 
 
 class Zip(Extract):
-    name = "zip"    
+    name = "zip"
     description = "Extract zip archive content"
     acts_on = ["zip"]

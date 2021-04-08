@@ -1,7 +1,7 @@
 import os
 import time
 import zipfile
-from urllib import urlopen, urlretrieve
+from urllib.request import urlopen, urlretrieve
 
 try:
     import requests
