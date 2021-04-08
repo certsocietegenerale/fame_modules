@@ -84,7 +84,7 @@ class VolatilityModule(ProcessingModule):
             available."""
         for plugin in iterify(plugins):
             if plugin not in self.plugins:
-                raise ModuleInitializationError(self, f"volatility plugin '{plugin}' needed")
+                raise ModuleInitializationError(self, "volatility plugin '{}' needed".format(plugin))
 
     def configure_plugin(self, plugin_name, **kwargs):
         """Configure and return a plugin
@@ -134,7 +134,7 @@ class VolatilityModule(ProcessingModule):
         return self._convert(plugin_instance.run())
 
     def each(self, target):
-        self.vol_ctx.config["automagic.LayerStacker.single_location"] = f"file://{target}"
+        self.vol_ctx.config["automagic.LayerStacker.single_location"] = "file://{}".format(target)
 
         return self.each_dump()
 

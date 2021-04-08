@@ -485,7 +485,7 @@ class CutTheCrap(IsolatedProcessingModule):
         try:
             target = self.set_extension(target, file_type)
             executable = self.paths[file_type]
-            cmdline = f"\"{executable}\" \"{target}\""
+            cmdline = "\"{}\" \"{}\"".format(executable, target)
 
             # Start the process in a paused state
             process = win32process.CreateProcess(

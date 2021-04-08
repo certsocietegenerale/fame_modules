@@ -49,31 +49,31 @@ class Mattermost(ReportingModule):
         )
 
         if analysis["modules"]:
-            string += f"Selected Modules: {', '.join(analysis['modules'])}\n"
+            string += "Selected Modules: {}\n".format(', '.join(analysis['modules']))
 
         if analysis["probable_names"]:
-            string += f"Probable Names: {', '.join(analysis['probable_names'])}\n"
+            string += "Probable Names: {}\n".format(', '.join(analysis['probable_names']))
 
         if analysis["extractions"]:
-            string += f"Extractions: {', '.join([x['label'] for x in analysis['extractions']])}\n"
+            string += "Extractions: {}\n".format(', '.join([x['label'] for x in analysis['extractions']]))
 
-        string += f"<{self.fame_base_url}/analyses/{analysis['_id']}|See analysis>\n"
+        string += "<{}/analyses/{}|See analysis>\n".format(self.fame_base_url, analysis['_id'])
 
         if analysis["iocs"]:
             string += "\n| Observable | Tags |\n"
             string += "|:-----------|:-----|\n"
 
             for ioc in analysis["iocs"]:
-                string += f"|{defang(ioc['value'])}|{', '.join(ioc['tags'])}|\n"
+                string += "|{}|{}|\n".format(defang(ioc['value']), ', '.join(ioc['tags']))
 
         string += "\n| Module | Status |\n"
         string += "|:-------|:------:|\n"
 
         for module in analysis["executed_modules"]:
-            string += f"|{module}| :ok_hand: executed |\n"
+            string += "|{}| :ok_hand: executed |\n".format(module)
 
         for module in analysis["canceled_modules"]:
-            string += f"|{module}| :rage2: canceled |\n"
+            string += "|{}| :rage2: canceled |\n".format(module)
 
         data = {"text": string}
         requests.post(self.url, data={"payload": json.dumps(data)})

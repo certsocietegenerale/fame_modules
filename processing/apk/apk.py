@@ -35,7 +35,7 @@ class APK(ProcessingModule):
 
             for cls in vm_analysis.get_classes():
                 cls = cls.get_vm_class()
-                if f"L{self.results['main_activity'].replace('.', '/')};".lower() in cls.get_name().lower():
+                if "L{};".format(self.results['main_activity'].replace('.', '/')).lower() in cls.get_name().lower():
                     self.results['main_activity_content'] = cls.get_source()
         except Exception:
             apk = None

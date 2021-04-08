@@ -72,7 +72,7 @@ class MemYara(VolatilityModule):
 
         # Build a VadYaraScan plugin instance
         vad_yara_scan = self.configure_plugin(
-            "windows.vadyarascan.VadYaraScan", yara_file=f"file://{rules_path}"
+            "windows.vadyarascan.VadYaraScan", yara_file="file://{}".format(rules_path)
         )
 
         rules = yarascan.YaraScan.process_yara_options(dict(vad_yara_scan.config))

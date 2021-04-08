@@ -50,15 +50,15 @@ class Slack(ReportingModule):
         )
 
         if analysis["modules"]:
-            string += f"Target: {', '.join(analysis['modules'])}\n"
+            string += "Target: {}\n".format(', '.join(analysis['modules']))
 
         if analysis["extractions"]:
-            string += f"Extractions: {', '.join([x['label'] for x in analysis['extractions']])}\n"
+            string += "Extractions: {}\n".format(', '.join([x['label'] for x in analysis['extractions']]))
 
         if analysis["probable_names"]:
-            string += f"Probable Names: {', '.join(analysis['probable_names'])}\n"
+            string += "Probable Names: {}\n".format(', '.join(analysis['probable_names']))
 
-        string += f"<{self.fame_base_url}/analyses/{analysis['_id']}|See analysis>"
+        string += "<{}/analyses/{}|See analysis>".format(self.fame_base_url, analysis['_id'])
 
         data = {"text": string}
         requests.post(self.url, data={"payload": json.dumps(data)})

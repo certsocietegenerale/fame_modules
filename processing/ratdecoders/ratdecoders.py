@@ -44,7 +44,7 @@ class RATDecoders(ProcessingModule):
 
             self.add_probable_name(file_info.malware_name)
             self.add_extraction(
-                f"{file_info.malware_name} Configuration", json.dumps(module.config, indent=2)
+                "{} Configuration".format(file_info.malware_name), json.dumps(module.config, indent=2)
             )
 
             return True
