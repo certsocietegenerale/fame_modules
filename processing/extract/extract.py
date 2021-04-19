@@ -44,8 +44,9 @@ class Extract(ProcessingModule):
             if line.startswith("warning:"):
                 self.results["warnings"].append(line.lstrip("warning: "))
             elif line.startswith("should_analyze:"):
-                filepath = os.path.join(self.results_dir, line.lstrip("should_analyze:  /data/output/"))
-                namelist.append(os.path.basename(filepath))
+                base_path = line.replace("should_analyze: /data/output/", "")
+                filepath = os.path.join(self.results_dir, base_path)
+                namelist.append(base_path)
                 if os.path.isfile(filepath):
                     self.add_extracted_file(filepath)
             else:
@@ -87,9 +88,10 @@ class Extract(ProcessingModule):
 
         copyfile(target, os.path.join(self.outdir, os.path.basename(target)))
         target = os.path.join("/data/", os.path.basename(target))
-
+        print(target)
         # execute docker container
         output = self.extract(target)
+        print(output)
 
         # save log output from dockerized app, extract potential redirections
         self.save_output(output)

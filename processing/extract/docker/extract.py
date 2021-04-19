@@ -30,7 +30,7 @@ if os.path.exists("/data/passwords_candidates.txt"):
 try:
     with libarchive.public.file_reader(target, passphrases=password_candidates) as ar:
         for entry in ar:
-            if entry.pathname != ".":
+            if entry.filetype.IFREG:
                 entries.append(entry.pathname)
 except libarchive.exception.ArchiveError:
     print("Cannot read archive content")
@@ -44,15 +44,17 @@ if should_extract:
             for entry in ar:
                 if entry.pathname == ".":
                     continue
-                filepath = os.path.join('/data/output/', entry.pathname)
-                dirname = os.path.dirname(filepath)
-                if not os.path.exists(dirname):
-                    os.makedirs(dirname)
-                with open(filepath, "wb") as o:
-                    for block in entry.get_blocks():
-                        o.write(block)
-                if os.path.isfile(filepath):
-                    print(("should_analyze: {}".format(filepath)))
+                abspath = os.path.join('/data/output/', entry.pathname)
+                if entry.filetype.IFDIR and not os.path.exists(abspath):
+                    os.makedirs(abspath)
+                elif entry.filetype.IFREG:
+                    dirname = os.path.dirname(abspath)
+                    if not os.path.exists(dirname):
+                        os.makedirs(dirname)
+                    with open(abspath, "wb") as o:
+                        for block in entry.get_blocks():
+                            o.write(block)
+                    print(("should_analyze: {}".format(abspath)))
     except libarchive.exception.ArchiveError:
         print("warning: Unable to extract the archive (password not known)")
     except ValueError:
