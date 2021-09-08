@@ -1,0 +1,49 @@
+<div class="col-md-12">
+    <div class="card">
+        <div class="header">
+            <h4 class="title">Hatching Triage</h4>
+            <p class="category">Detailed Results</p>
+        </div>
+        <div class="content">
+            <label>Score</label>
+            {% if results.analysis.score %}
+                {% if results.analysis.score > 6.0 %}
+                    <h2 style="margin: 0 0 15px; 0"><span class="label label-danger">{{results.analysis.score}}</span></h2>
+                {% elif results.analysis.score > 2.0 %}
+                    <h2 style="margin: 0 0 15px; 0"><span class="label label-warning">{{results.analysis.score}}</span></h2>
+                {% else %}
+                    <h2 style="margin: 0 0 15px; 0"><span class="label label-success">{{results.analysis.score}}</span></h2>
+                {% endif %}
+            {% endif %}
+
+            {% if results.analysis.family %}
+                <label>Family</label>
+                {% for family in results.analysis.family %}
+                    <p>{{family}}</p>
+                {% endfor %}
+            {% endif %}
+
+            <label>Signatures</label>
+            {% for signature in results.signatures %}
+
+                {% if signature.score %}
+                    <div class="close-alert alert {% if signature.score > 6 %}alert-danger{% elif signature.score > 2 %}alert-warning{% else %}alert-info{% endif %}">
+                        {{signature.name}}
+                    </div>
+                {% else %}
+                    <div class="close-alert alert alert-info">
+                        {{signature.name}}
+                    </div>
+                {% endif %}
+            {% endfor %}
+            <div class="footer">
+                <hr />
+                <div class="stats">
+                    <ul>
+                        <li><a href="{{results.url}}" target="_blank"><i class="pe-7s-link"></i> View Report</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
