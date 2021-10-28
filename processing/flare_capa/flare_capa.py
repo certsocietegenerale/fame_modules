@@ -50,5 +50,5 @@ class FlareCapa(ProcessingModule):
                 for mbc in rule['meta']['mbc']:
                     if mbc['objective'] not in self.results:
                         self.results[mbc['objective']] = []
-                    self.results[mbc['objective']].append(f"{mbc['behavior']} {mbc.get('method')}::{mbc['id']}")
+                    self.results[mbc['objective']].append(f"{mbc['id']}: {mbc['behavior']}::{mbc.get('method')}")
         return len(self.results) > 0
