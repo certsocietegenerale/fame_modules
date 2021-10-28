@@ -18,8 +18,7 @@ class FlareCapa(ProcessingModule):
         {
             'name': 'rules',
             'type': 'str',
-            'default': '/opt/capa/rules/',
-            'description': 'Path for Capa rules.'
+            'description': 'Path for Capa rules. The directory needs to be created manually and can be cloned from https://github.com/mandiant/capa-rules'
         }
     ]
 
