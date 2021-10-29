@@ -1,0 +1,25 @@
+{% if results|length > 0 %}
+<div class="col-md-12">
+    <div class="card">
+        <div class="header">
+            <h4 class="title">Flare Capa</h4>
+            <p class="category">Detailed Results</p>
+        </div>
+        <div class="content">
+                {% for objective in results.keys() %}
+                    {% if (objective.lower()).replace(' ', '-') in ['commmunication', 'cryptography', 'data', 'file-system', 'hardware', 'memory', 'operating-system', 'process'] %}
+                    {% set alert_type = 'alert-info' %}
+                    {% else %}
+                    {% set alert_type = 'alert-warning' %}
+                    {% endif %}
+                    <h5>{{objective}}</h5>
+                    {% for behavior in results[objective] %}
+                    <div class="close-alert alert {{alert_type}}">
+                        {{behavior}}
+                    </div>
+                    {% endfor %}
+                {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
