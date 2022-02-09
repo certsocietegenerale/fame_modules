@@ -5,7 +5,7 @@ ENV EXIFTOOL_VERSION=12.34
 RUN apk add --no-cache perl perl-utils make
 
 # Install uesefull packages
-RUN cpan Archive::Zip
+RUN cpan -f Archive::Zip
 
 # Download and install exiftool
 RUN wget https://exiftool.org/Image-ExifTool-${EXIFTOOL_VERSION}.tar.gz \
