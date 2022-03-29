@@ -156,3 +156,4 @@ class UrlPreview(ProcessingModule):
             self.results["target"] = "No target, probably timed out"
 
         return len(self.results["redirections"]) > 0 or screenshot
+)();
