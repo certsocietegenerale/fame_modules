@@ -54,7 +54,7 @@ class UrlPreview(ProcessingModule):
         {
             "name": "network_idle_timeout",
             "type": "integer",
-            "default": 500,
+            "default": 5000,
             "description": "Specify the network idle timeout (ms)",
         }
     ]
@@ -68,7 +68,7 @@ class UrlPreview(ProcessingModule):
     def save_preview(self, outdir):
         filepath = os.path.join(outdir, "output.png")
 
-        if os.path.isfile(filepath):
+        if os.path.exists(filepath) and os.path.isfile(filepath):
             self.add_support_file("preview", filepath)
             return True
         else:
@@ -96,12 +96,11 @@ class UrlPreview(ProcessingModule):
             if line.startswith("redirect"):
                 redirect = line.split()
                 self.results["redirections"].append(redirect[1])
+            elif line.startswith("target"):
+                target = line.split()
+                self.results["target"] = target[1]
             else:
                 self.log("debug", line)
-
-        # add last element as target url
-        # then delete last element
-        self.results["target"] = self.results["redirections"].pop()
 
     def each_with_type(self, target, filetype):
         self.results = {"redirections": [], "target": None}
@@ -138,17 +137,22 @@ class UrlPreview(ProcessingModule):
         # save preview image
         screenshot = self.save_preview(results_dir)
 
-        with open(os.path.join(results_dir, "output.html")) as f:
-            parser = MyHTMLParser()
-            parser.feed(f.read())
-            for url in parser.get_urls():
-                self.add_ioc(url)
+        filepath = os.path.join(results_dir, "output.html")
+        if os.path.exists(filepath):
+            with open(filepath) as f:
+                parser = MyHTMLParser()
+                parser.feed(f.read())
+                for url in parser.get_urls():
+                    self.add_ioc(url)
 
         if len(self.results["redirections"]) > 0:
             # save redirections as observable
             self.add_ioc(self.results["redirections"], ["redirection"])
 
             # save target as observable
-            self.add_ioc(self.results["target"])
+            if self.results["target"] is not None:
+                self.add_ioc(self.results["target"])
+        if self.results["target"] is None:
+            self.results["target"] = "No target, probably timed out"
 
         return len(self.results["redirections"]) > 0 or screenshot
