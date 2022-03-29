@@ -33,4 +33,3 @@ var userwait = Number(process.argv[3]);
     }
     await browser.close();
 })();
-)();
