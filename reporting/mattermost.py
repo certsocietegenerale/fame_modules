@@ -73,7 +73,7 @@ class Mattermost(ReportingModule):
             string += "|{}| :ok_hand: executed |\n".format(module)
 
         for module in analysis["canceled_modules"]:
-            string += "|{}| :rage2: canceled |\n".format(module)
+            string += "|{}| :rage: canceled |\n".format(module)
 
         data = {"text": string}
         requests.post(self.url, data={"payload": json.dumps(data)})
