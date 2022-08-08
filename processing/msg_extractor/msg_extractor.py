@@ -5,6 +5,8 @@ import re
 try:
     # Use https://github.com/mattgwwalker/msg-extractor to read .msg files
     import extract_msg
+    import extract_msg.utils as msg_utils
+    import extract_msg.enums as msg_enums
     HAVE_EXTRACT_MSG = True
 except ImportError:
     HAVE_EXTRACT_MSG = False
@@ -31,13 +33,18 @@ class MSG(ProcessingModule):
         paths = []
 
         for attachment in attachments:
-            if attachment.type == "msg":
-                tmp = attachment.save(customPath=outdir, useFileName=True)
-                for file in os.listdir(tmp):
-                    paths.append("%s%s%s" % (tmp, os.path.sep, file))
-            else:
-                paths.append(attachment.save(customPath=outdir))
+            if attachment.type == msg_enums.AttachmentType.MSG:
+                attachment.save(customPath=outdir, useMsgFilename=True)
 
+                folder = os.path.splitext(os.path.split(attachment.data.filename)[1])[0]
+                folder = msg_utils.prepareFilename(folder)[:256]
+                for file in os.listdir("%s%s%s" % (outdir, os.path.sep, folder):
+                    paths.append("%s%s%s%s%s" % (outdir, os.path.sep, folder, os.path.sep, file))
+            else:
+                attachment.save(customPath=outdir)
+
+                filename = msg_utils.inputToString(attachment.getFilename(), attachment.msg.stringEncoding)
+                paths.append("%s%s%s" % (outdir, os.path.sep, msg_utils.prepareFilename(filename)))
         return paths
 
     def extract_urls(self, mail):

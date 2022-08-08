@@ -1,1 +1,1 @@
-extract-msg==0.27.10
+extract-msg==0.36.1
