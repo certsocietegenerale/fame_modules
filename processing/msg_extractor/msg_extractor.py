@@ -38,7 +38,7 @@ class MSG(ProcessingModule):
 
                 folder = os.path.splitext(os.path.split(attachment.data.filename)[1])[0]
                 folder = msg_utils.prepareFilename(folder)[:256]
-                for file in os.listdir("%s%s%s" % (outdir, os.path.sep, folder):
+                for file in os.listdir("%s%s%s" % (outdir, os.path.sep, folder)):
                     paths.append("%s%s%s%s%s" % (outdir, os.path.sep, folder, os.path.sep, file))
             else:
                 attachment.save(customPath=outdir)
