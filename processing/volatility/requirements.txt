@@ -1,3 +1,3 @@
--e git+https://github.com/volatilityfoundation/volatility3.git@93c6a629720720e2525399072445a66e197d707f#egg=volatility
+volatility3==2.0.1
 yara-python==4.0.2
 hexdump==3.3
