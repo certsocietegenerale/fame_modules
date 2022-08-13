@@ -1,2 +1,3 @@
 yara-python==4.0.2
 malwareconfig==1.0.4
+pycryptodome

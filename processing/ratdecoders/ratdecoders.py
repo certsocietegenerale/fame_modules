@@ -9,7 +9,7 @@ try:
     from malwareconfig.modules import __decoders__, __preprocessors__
 
     HAVE_RATDECODERS = True
-except ImportError:
+except (ImportError, NameError):
     HAVE_RATDECODERS = False
 
 
