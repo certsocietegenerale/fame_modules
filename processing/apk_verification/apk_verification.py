@@ -13,7 +13,7 @@ except ImportError:
     HAVE_ANDROGUARD = False
 
 try:
-    from googleplay_api.googleplay import GooglePlayAPI
+    from playstoreapi.googleplay import GooglePlayAPI
     HAVE_GOOGLEPLAY = True
 except ImportError:
     HAVE_GOOGLEPLAY = False
@@ -47,7 +47,7 @@ class APKVerification(ProcessingModule):
             raise ModuleInitializationError(self, "Missing dependency: androguard")
 
         if not HAVE_GOOGLEPLAY:
-            raise ModuleInitializationError(self, "Missing dependency: googleplay-api")
+            raise ModuleInitializationError(self, "Missing dependency: playstore-api")
 
     def validate_signature(self, file, key='target'):
         # Verify the signature

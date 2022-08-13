@@ -1,2 +1,2 @@
 androguard
-googleplay-api
+playstoreapi
