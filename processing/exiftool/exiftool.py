@@ -44,7 +44,7 @@ File Permissions""",
                 volumes={target: {'bind': '/data/target.file', 'mode': 'ro'}},
                 stderr=True,
                 remove=True))
-        except docker.errors.ContainerError as e:
+        except (docker.errors.ContainerError, docker.errors.APIError) as e:
             self.parse_output(e.stderr)
 
     def parse_output(self, out):
@@ -66,10 +66,11 @@ File Permissions""",
             elif name not in self.exclude:
                 self.results.append((name, value))
 
-    def each(self, target):
+    def each_with_type(self, target, file_type):
         self.results = []
 
-        # Execute exiftool inside Docker container and parse output
-        self.exiftool(target)
+        if file_type != 'url':
+            # Execute exiftool inside Docker container and parse output
+            self.exiftool(target)
 
         return len(self.results) > 0
