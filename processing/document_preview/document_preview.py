@@ -68,7 +68,7 @@ class DocumentPreview(ProcessingModule):
             volumes={self.outdir: {'bind': '/data', 'mode': 'rw'}},
             stderr=True,
             remove=True
-        )
+        ).decode().strip()
 
     def each_with_type(self, target, target_type):
         self.results = ""
@@ -80,7 +80,8 @@ class DocumentPreview(ProcessingModule):
         output = self.preview(target, target_type)
 
         # save log output from dockerized app
-        self.save_output(output)
+        if output:
+            self.save_output(output)
 
         # output dir
         results_dir = os.path.join(self.outdir, 'output')

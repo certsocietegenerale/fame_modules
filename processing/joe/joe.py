@@ -268,5 +268,5 @@ class Joe(ProcessingModule):
         graph = report.find(id='behaviorGraph')
         if graph is not None:
             graph = graph.find('svg')
-            self.results['graph'] = graph.encode('utf8')
+            self.results['graph'] = str(graph)
 
