@@ -7,7 +7,7 @@ from . import APKPlugin
 try:
     from Crypto.Cipher import Blowfish
     HAVE_PYCRYPTO = True
-except ImportError:
+except (ImportError, NameError):
     HAVE_PYCRYPTO = False
 
 
