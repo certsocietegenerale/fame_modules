@@ -4,18 +4,25 @@
             <h4 class="title">Joe Sandbox</h4>
             <p class="category">Detailed Results</p>
         </div>
+        {% if results.conf %}
+        <div class="content">
+            <p class="category">Malware Configuration</p>
+            <pre><code>{{results.conf}}</code></pre>
+        </div>
+        {% endif %}
         <div class="content">
             {% if results.graph %}
-                {{results.graph|safe}}
+            <p class="category">Behavior Graph</p>
+            <pre>{{results.graph|safe}}</pre>
             {% else %}
-                <p>No graph to display.</p>
+            <p>No graph to display.</p>
             {% endif %}
             <div class="footer">
                 <hr />
                 <div class="stats">
                     <ul>
                         {% if current_user.has_permission('joe_access') %}
-                            <li><a href="{{results.URL}}" target="_blank"><i class="pe-7s-link"></i> View Report</a></li>
+                        <li><a href="{{results.URL}}" target="_blank"><i class="pe-7s-link"></i> View Report</a></li>
                         {% endif %}
                         {{support_files(name)}}
                     </ul>
