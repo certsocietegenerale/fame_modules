@@ -204,10 +204,14 @@ class Joe(ProcessingModule):
             unpacked_files = []
             with ZipFile(unpackpe) as zf:
                 for name in zf.namelist():
-                    unpacked_files.append(zf.extract(name, tmpdir, pwd="infected"))
+                    unpacked_files.append(zf.extract(name, tmpdir, pwd=b'infected'))
+                    unpacked_files.append(zf.extract(name, tmpdir, pwd=b"infected"))
             self.register_files("unpacked_executable", unpacked_files)
         except Exception as err:
-            raise ModuleExecutionError("Error encountered while processing unpacked executables:\n{}".format(err))
+            if str(err) == "The selected resource does not exist.":
+                self.log("debug", "No unpacked executable found")
+            else:
+                raise ModuleExecutionError("Error encountered while processing unpacked executables:\n{}".format(err))
 
     def extract_url(self, scheme, iocs, request):
         match = re.match(r"(GET|POST) (\S+) .*Host: (\S+)", request, re.DOTALL)
