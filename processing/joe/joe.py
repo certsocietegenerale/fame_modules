@@ -160,7 +160,7 @@ class Joe(ProcessingModule):
                 data = self.joe.submission_info(self.submission_id)
                 status = data["status"]
             except JoeException as error:
-                raise ModuleExecutionError("Error while waiting for analysis:\n{}".format(error))
+                raise ModuleExecutionError("Error while waiting for analysis: {}".format(error))
             if status == "finished":
                 break
             time.sleep(self.wait_step)
@@ -173,7 +173,7 @@ class Joe(ProcessingModule):
             analysis_info = self.joe.analysis_info(self.webid)
             self.analysisid = analysis_info["analysisid"]
         except JoeException as error:
-            raise ModuleExecutionError("Error while getting analysis details:\n{}".format(error))
+            raise ModuleExecutionError("Error while getting analysis details: {}".format(error))
 
     def process_report(self):
         try:
@@ -194,7 +194,7 @@ class Joe(ProcessingModule):
                 fd.write(data[1])
             self.add_support_file("Report", filepath)
         except Exception as error:
-            raise ModuleExecutionError("Error encountered while processing report:\n{}".format(error))
+            raise ModuleExecutionError("Error encountered while processing report: {}".format(error))
 
     def get_unpacked_executables(self):
         try:
@@ -211,7 +211,7 @@ class Joe(ProcessingModule):
             if str(err) == "The selected resource does not exist.":
                 self.log("debug", "No unpacked executable found")
             else:
-                raise ModuleExecutionError("Error encountered while processing unpacked executables:\n{}".format(err))
+                raise ModuleExecutionError("Error encountered while processing unpacked executables: {}".format(err))
 
     def extract_url(self, scheme, iocs, request):
         match = re.match(r"(GET|POST) (\S+) .*Host: (\S+)", request, re.DOTALL)
