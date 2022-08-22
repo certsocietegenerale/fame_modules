@@ -266,6 +266,6 @@ class Joe(ProcessingModule):
 
     def extract_conf(self, report):
         conf = report.find(id="malware-configurationColl")
-        if conf is not None:
+        if conf is not None and conf.code is not None:
             conf = conf.code.string
             self.results["conf"] = conf
