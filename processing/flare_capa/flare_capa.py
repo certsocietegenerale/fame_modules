@@ -24,7 +24,7 @@ class FlareCapa(ProcessingModule):
 
     def initialize(self):
         if not HAVE_CAPA:
-            raise ModuleInitializationError(self, 'Missing dependency: flare-capa')
+            raise ModuleInitializationError('Missing dependency: flare-capa')
 
     def each(self, target):
         self.results = {}
@@ -34,7 +34,7 @@ class FlareCapa(ProcessingModule):
             extractor = capa.main.get_extractor(target, "auto", capa.main.BACKEND_VIV, [], False, disable_progress=True)
             capabilities, counts = capa.main.find_capabilities(rules, extractor, disable_progress=True)
         except Exception as error:
-            raise ModuleExecutionError(self, 'Could not run capa on target with error: ' + str(error))
+            raise ModuleExecutionError('Could not run capa on target with error: ' + str(error))
 
         meta = capa.main.collect_metadata('', target, self.rules, extractor)
         meta['analysis'].update(counts)
