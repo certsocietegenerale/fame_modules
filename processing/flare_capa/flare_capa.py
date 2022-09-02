@@ -25,7 +25,7 @@ class FlareCapa(ProcessingModule):
 
     def initialize(self):
         if not HAVE_CAPA:
-            raise ModuleInitializationError('Missing dependency: flare-capa')
+            raise ModuleInitializationError(self, 'Missing dependency: flare-capa')
 
     def compute_layout(self, rules, extractor, capabilities):
         """
