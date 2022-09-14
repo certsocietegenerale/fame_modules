@@ -13,7 +13,7 @@ except ImportError:
     HAVE_ANDROGUARD = False
 
 try:
-    from playstoreapi.googleplay import GooglePlayAPI
+    from gpapi.googleplay import GooglePlayAPI, RequestError
     HAVE_GOOGLEPLAY = True
 except ImportError:
     HAVE_GOOGLEPLAY = False
@@ -26,11 +26,6 @@ class APKVerification(ProcessingModule):
 
     config = [
         {
-            'name': 'android_id',
-            'type': 'str',
-            'description': 'An Android device ID (https://developer.android.com/reference/android/provider/Settings.Secure.html#ANDROID_ID)'
-        },
-        {
             'name': 'google_login',
             'type': 'str',
             'description': 'A email address matching a Google account.'
@@ -38,7 +33,7 @@ class APKVerification(ProcessingModule):
         {
             'name': 'google_password',
             'type': 'str',
-            'description': 'The password of the previously configured Google account.'
+            'description': 'An application password related to your Google account. You can generate one here: https://myaccount.google.com/apppasswords'
         },
     ]
 
@@ -47,40 +42,40 @@ class APKVerification(ProcessingModule):
             raise ModuleInitializationError(self, "Missing dependency: androguard")
 
         if not HAVE_GOOGLEPLAY:
-            raise ModuleInitializationError(self, "Missing dependency: playstore-api")
+            raise ModuleInitializationError(self, "Missing dependency: gpapi")
 
     def validate_signature(self, file, key='target'):
         # Verify the signature
         p = Popen(["jarsigner", "-verify", file], stdout=PIPE)
-        out = p.communicate()[0]
+        out = p.communicate()[0].decode().strip()
         self.results["{}_output".format(key)] = out
         self.results["{}_status".format(key)] = ((p.returncode == 0) and (out.startswith('jar verified.')))
+        if not 'jar is unsigned.' in out:
+            # Extract the certificate
+            z = ZipFile(file)
+            for name in z.namelist():
+                if name.startswith('META-INF/') and name.endswith('.RSA'):
+                    cert = z.extract(name, self.tmpdir)
+                    break
+            z.close()
 
-        # Extract the certificate
-        z = ZipFile(file)
-        for name in z.namelist():
-            if name.startswith('META-INF/') and name.endswith('.RSA'):
-                cert = z.extract(name, self.tmpdir)
-                break
-        z.close()
-
-        # Extract certificate details
-        p = Popen(["keytool", "-printcert", "-file", cert], stdout=PIPE)
-        self.results["{}_certificate".format(key)] = p.communicate()[0]
+            # Extract certificate details
+            p = Popen(["keytool", "-printcert", "-file", cert], stdout=PIPE)
+            self.results["{}_certificate".format(key)] = p.communicate()[0].decode().strip()
 
     def download_reference_apk(self):
-        api = GooglePlayAPI(self.android_id)
+        api = GooglePlayAPI()
         api.login(self.google_login, self.google_password)
 
         package = api.details(self.results['package'])
-        doc = package.docV2
-        version = doc.details.appDetails.versionCode
-        offer_type = doc.offer[0].offerType
+        version = package['details']['appDetails']['versionCode']
+        offer_type = package['offer'][0]['offerType']
 
         ref_path = path.join(self.tmpdir, "ref.apk")
         data = api.download(self.results['package'], version, offer_type)
         with open(ref_path, "wb") as out:
-            out.write(data)
+            for chunk in data['file']['data']:
+                out.write(chunk)
 
         return ref_path
 
@@ -91,10 +86,14 @@ class APKVerification(ProcessingModule):
         apk, vm, vm_analysis = AnalyzeAPK(target)
         self.results['package'] = apk.get_package()
         self.validate_signature(target)
+        try:
+            ref_apk = self.download_reference_apk()
+            self.validate_signature(ref_apk, "ref")
 
-        ref_apk = self.download_reference_apk()
-        self.validate_signature(ref_apk, "ref")
+            self.results['verification_result'] = self.results['target_status'] and self.results['ref_status'] and (self.results['target_certificate'] == self.results['ref_certificate'])
+        except RequestError:
+            self.log("debug", "Submitted APK was not found on the Play Store")
+            self.results['verification_result'] = False
 
-        self.results['verification_result'] = self.results['target_status'] and self.results['ref_status'] and (self.results['target_certificate'] == self.results['ref_certificate'])
 
         return True

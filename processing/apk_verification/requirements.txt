@@ -1,2 +1,2 @@
 androguard
-playstoreapi
+git+https://github.com/Augustin-FL/googleplay-api@use_session#egg=gpapi
