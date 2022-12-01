@@ -1,4 +1,4 @@
-FROM node:10.23-slim
+FROM node:19.2-slim
 
 # See https://crbug.com/795759
 RUN apt update && apt install -yq libgconf-2-4 software-properties-common wget gnupg
@@ -10,7 +10,7 @@ RUN apt update && apt-get install -y wget --no-install-recommends \
     && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
     && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
     && apt update \
-    && apt install -y google-chrome-stable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst ttf-freefont \
+    && apt install -y google-chrome-stable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf \
       --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && apt purge --auto-remove \
@@ -21,8 +21,8 @@ ADD https://github.com/Yelp/dumb-init/releases/download/v1.2.0/dumb-init_1.2.0_a
 RUN chmod +x /usr/local/bin/dumb-init
 
 # Install puppeteer so it's available in the container.
-RUN npm i puppeteer
-RUN npm i fs-extra
+RUN npm i puppeteer -g
+RUN npm i fs-extra -g
 
 COPY script.js /
 

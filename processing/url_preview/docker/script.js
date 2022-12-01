@@ -1,5 +1,5 @@
-const puppeteer = require('puppeteer');
-const fse = require('fs-extra');
+const puppeteer = require('/usr/local/lib/node_modules/puppeteer');
+const fse = require('/usr/local/lib/node_modules/fs-extra');
 var userurl = process.argv[2];
 var userwait = Number(process.argv[3]);
 
