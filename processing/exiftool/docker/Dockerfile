@@ -1,6 +1,6 @@
 FROM alpine:3
 
-ENV EXIFTOOL_VERSION=12.34
+ENV EXIFTOOL_VERSION=12.51
 
 RUN apk add --no-cache perl perl-utils make
 
