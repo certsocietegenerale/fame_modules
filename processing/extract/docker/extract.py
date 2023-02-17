@@ -32,7 +32,7 @@ try:
         for entry in ar:
             if entry.filetype.IFREG:
                 entries.append(entry.pathname)
-except libarchive.exception.ArchiveError:
+except (libarchive.exception.ArchiveError, UnicodeEncodeError, UnicodeDecodeError):
     print("Cannot read archive content")
 
 should_extract = len(entries) <= maximum_extracted_files
