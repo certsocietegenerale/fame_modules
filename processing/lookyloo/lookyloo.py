@@ -13,10 +13,8 @@ import re
 try:
     import pylookyloo
     HAVE_LOOKYLOO = True
-    print('Lookyloo imported')
 except ImportError:
     HAVE_LOOKYLOO = False
-    print('Lookyloo not found')
 
 class MyHTMLParser(HTMLParser):
     def __init__(self):
