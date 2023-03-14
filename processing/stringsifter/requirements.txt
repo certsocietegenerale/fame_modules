@@ -1,3 +1,4 @@
-lightgbm==3.3.0; python_version >= "3.8"
 stringsifter==2.20201202; python_version >= "3.8"
+lightgbm==3.3.0; python_version >= "3.8"
+numpy==1.19.5; python_version >= "3.8"
 stringsifter~=1.20201201; python_version <= "3.7"
