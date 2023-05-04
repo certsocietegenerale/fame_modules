@@ -1,6 +1,7 @@
 import os
 import hashlib
 from shutil import rmtree
+import copy
 
 from fame.core.module import ProcessingModule, ModuleInitializationError, ModuleExecutionError
 from fame.common.utils import tempdir
@@ -42,6 +43,35 @@ class Peepdf(ProcessingModule):
     name = "peepdf"
     description = "Analyze PDF files with peepdf."
     acts_on = "pdf"
+
+    possible_elements = {
+        'files': set(),
+        'urls': set(),
+        'vulns': [],
+        '/Names': set(),
+        '/OpenAction': set(),
+        '/AA': set(),
+        '/AcroForm': set(),
+        '/XFA': set(),
+        '/JS': set(),
+        '/JavaScript': set(),
+        '/Launch': set(),
+        '/SubmitForm': set(),
+        '/ImportData': set(),
+        '/RichMedia': set(),
+        '/Flash': set(),
+        'javascript': "",
+        'objects': {}
+    }
+
+    config = [
+        {
+            "name": "suspicious_elements",
+            "type": "text",
+            "default": "\n".join([elem for elem in possible_elements]),
+            "description": "Skip file review unless the following elements are detected. If you wish to review all files, let this field empty."
+        }
+    ]
 
     def initialize(self):
         if not HAVE_PEEPDF:
@@ -169,26 +199,8 @@ class Peepdf(ProcessingModule):
 
     def each(self, target):
         self._outdir = None
-
-        self.results = {
-            'files': set(),
-            'urls': set(),
-            'vulns': [],
-            '/Names': set(),
-            '/OpenAction': set(),
-            '/AA': set(),
-            '/AcroForm': set(),
-            '/XFA': set(),
-            '/JS': set(),
-            '/JavaScript': set(),
-            '/Launch': set(),
-            '/SubmitForm': set(),
-            '/ImportData': set(),
-            '/RichMedia': set(),
-            '/Flash': set(),
-            'javascript': "",
-            'objects': {}
-        }
+        self.results = copy.deepcopy(self.possible_elements)
+        suspicious_elements = [e.strip() for e in self.suspicious_elements.split("\n")]
 
         result, pdf = peepdf.PDFCore.PDFParser().parse(
             target,
@@ -211,10 +223,15 @@ class Peepdf(ProcessingModule):
         self.clean_up()
 
         clean = True
+        review = False
         for element_type in self.results:
             if self.results[element_type]:
                 clean = False
+                if element_type in suspicious_elements:
+                    review = True
 
         self.results['clean'] = clean
+        if not review and suspicious_elements != list(self.possible_elements.keys()):
+            self.skip_review()
 
         return True
