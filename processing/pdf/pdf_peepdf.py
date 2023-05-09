@@ -28,7 +28,6 @@ def file_sha256(filepath):
                 break
             sha256.update(data)
 
-    return sha256.hexdigest()
 
 
 def js_beautify_string(string):
@@ -42,6 +41,15 @@ class Peepdf(ProcessingModule):
     name = "peepdf"
     description = "Analyze PDF files with peepdf."
     acts_on = "pdf"
+
+    config = [
+        {
+            "name": "skip_safe_file_review",
+            "type": "bool",
+            "default": False,
+            "description": "Skip file review when no suspicious elements are found."
+        }
+    ]
 
     def initialize(self):
         if not HAVE_PEEPDF:
@@ -216,5 +224,7 @@ class Peepdf(ProcessingModule):
                 clean = False
 
         self.results['clean'] = clean
+        if clean and self.skip_safe_file_review:
+            self.skip_review()
 
         return True
