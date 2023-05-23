@@ -1,1 +1,1 @@
-hatching-triage==0.1.7
+hatching-triage>=0.1.10
