@@ -69,13 +69,13 @@ class FlareCapa(ProcessingModule):
         self.results = {}
 
         try:
-            rules = capa.rules.RuleSet(capa.main.get_rules([self.rules], disable_progress=True))
-            extractor = capa.main.get_extractor(target, "auto", capa.main.BACKEND_VIV, [], False, disable_progress=True)
+            rules = capa.main.get_rules([self.rules])
+            extractor = capa.main.get_extractor(target, "auto", "auto", capa.main.BACKEND_VIV, [], False, disable_progress=True)
             capabilities, counts = capa.main.find_capabilities(rules, extractor, disable_progress=True)
         except Exception as error:
             raise ModuleExecutionError('Could not run capa on target with error: ' + str(error))
 
-        meta = capa.main.collect_metadata([], target, self.rules, extractor)
+        meta = capa.main.collect_metadata([], target, "auto", "auto",  self.rules, extractor)
         meta['analysis'].update(counts)
         meta["analysis"]["layout"] = self.compute_layout(rules, extractor, capabilities)
 
