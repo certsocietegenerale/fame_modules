@@ -2,6 +2,7 @@ import argparse
 import os
 from pdf2image import convert_from_path
 import re
+from werkzeug.utils import secure_filename
 
 
 def pdftoimages(target, max_pages):
@@ -18,7 +19,9 @@ def pdftoimages(target, max_pages):
     # save pages to jpeg format
     for page in pages:
         counter = counter + 1
-        page.save('./output/{}_{}.jpeg'.format(re.sub('[^A-Za-z0-9]+', '_', target), counter))
+        filename_base = '{}'.format(re.sub('[^A-Za-z0-9]+', '_', target))
+        secure_filename_base = secure_filename(filename_base)
+        page.save('./output/{}_{}.jpeg'.format(secure_filename_base, counter))
 
     if counter == 0:
         print('error: could not convert PDF to images')
