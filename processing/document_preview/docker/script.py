@@ -18,7 +18,7 @@ def pdftoimages(target, max_pages):
     # save pages to jpeg format
     for page in pages:
         counter = counter + 1
-        page.save('./output/{}_{}.jpeg'.format(re.sub('[^A-Za-z0-9]+', '_', target), counter))
+        page.save('./output/output_{}.jpeg'.format(counter))
 
     if counter == 0:
         print('error: could not convert PDF to images')
