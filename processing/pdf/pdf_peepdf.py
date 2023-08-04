@@ -197,12 +197,14 @@ class Peepdf(ProcessingModule):
             'javascript': "",
             'objects': {}
         }
-
-        result, pdf = peepdf.PDFCore.PDFParser().parse(
-            target,
-            forceMode=True,
-            looseMode=True
-        )
+        try:
+            result, pdf = peepdf.PDFCore.PDFParser().parse(
+                target,
+                forceMode=True,
+                looseMode=True
+            )
+        except Exception as e:
+            result = e
 
         if result:
             raise ModuleExecutionError('error during PDF parsing: {}'.format(result))

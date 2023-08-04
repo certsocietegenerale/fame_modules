@@ -5,23 +5,25 @@ import re
 
 
 def pdftoimages(target, max_pages):
-    pages = convert_from_path(target, last_page=int(max_pages))
     # delete extension in case we had to create pdf file from an office file
     target = os.path.splitext(target)[0]
-
     counter = 0
 
     # create folder if not exists
     if not os.path.isdir('output'):
         os.mkdir('output')
 
-    # save pages to jpeg format
-    for page in pages:
-        counter = counter + 1
-        page.save('./output/output_{}.jpeg'.format(counter))
-
-    if counter == 0:
-        print('error: could not convert PDF to images')
+    try:
+        pages = convert_from_path(target, last_page=int(max_pages))
+    except Exception as e:
+        print(str(e).strip())
+    else:
+        # save pages to jpeg format
+        for page in pages:
+            counter = counter + 1
+            page.save('./output/output_{}.jpeg'.format(counter))
+        if counter == 0:
+            print('error: could not convert PDF to images')
 
 
 def libreofficeconversion(args):
