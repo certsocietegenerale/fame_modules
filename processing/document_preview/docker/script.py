@@ -6,7 +6,6 @@ import re
 
 def pdftoimages(target, max_pages):
     # delete extension in case we had to create pdf file from an office file
-    target = os.path.splitext(target)[0]
     counter = 0
 
     # create folder if not exists
