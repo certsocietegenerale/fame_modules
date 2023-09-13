@@ -18,7 +18,10 @@ class URLDownload(ProcessingModule):
 
     def each(self, target):
         self.add_ioc(target)
-        response = requests.get(target, stream=True)
+        try:
+            response = requests.get(target, stream=True)
+        except (requests.exceptions.Timeout, requests.exceptions.ConnectionError, requests.exceptions.RequestException) as e:
+            raise ModuleExecutionError("Connection Error.")
 
         if response.status_code == 200:
             tmpdir = tempdir()
