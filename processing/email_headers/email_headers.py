@@ -110,7 +110,7 @@ class EmailHeader(ProcessingModule):
                 line = [x.replace("\r\n", "") for x in line]
 
                 org_time = self.parse_date(line[-1])
-                print(org_time, flush=True)
+
                 if line[0].startswith("from"):
                     data = re.findall(
                         """
