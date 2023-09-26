@@ -40,7 +40,7 @@ class QrCodeExtractor(ProcessingModule):
         if not HAVE_PYZBAR:
             raise ModuleInitializationError(self, "Missing dependency: pyzbar")
           
-""" def file_sha256(filepath):
+    """ def file_sha256(filepath):
         sha256 = hashlib.sha256()
 
         with open(filepath, 'rb') as f:
@@ -70,12 +70,16 @@ class QrCodeExtractor(ProcessingModule):
 
         sha256 = file_sha256(fpath)
         self.results['files'].add(sha256)
-"""
+    """
     # For each, check if QRcode is found and extract potentiel URL
-    # TO-DO include document preview for pdf to be able to read the qrcode
+    #   - TO-DO : include document preview for pdf to be able to read the qrcode
+    #               Or trigger the qrcode extractor after document preview
     
     def each(self, target):
         self._outdir = None
+        self.results = {
+            'urls': set()
+        }
         
         # add ioc for the url decoded
         if filetype == "url" and not target.startswith("http"):
