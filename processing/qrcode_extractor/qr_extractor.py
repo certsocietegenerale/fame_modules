@@ -1,11 +1,9 @@
 import glob
 import pathlib
-
+import hashlib
 
 from fame.core.module import ProcessingModule, ModuleInitializationError, ModuleExecutionError
 from fame.common.utils import tempdir
-
-
 
 try:
     import cv2
@@ -20,21 +18,10 @@ except ImportError:
     HAVE_PYZBAR = False
 
 
-def file_sha256(filepath):
-    sha256 = hashlib.sha256()
-
-    with open(filepath, 'rb') as f:
-        while True:
-            data = f.read(1000000)
-            if not data:
-                break
-            sha256.update(data)
-
-
 class QrCodeExtractor(ProcessingModule):
     name = "qr_extractor"
-    description = "Analyze PDF files and pictures to find QRcodes and decode them with two different libs."
-    acts_on = "png, pdf"
+    description = "Analyze files (via screenchot) and pictures (directly) to find QRcodes and decode them with two different libs."
+    acts_on = ["png", "pdf", "word", "html", "excel", "powerpoint"]
 
     config = [
         {
@@ -45,11 +32,23 @@ class QrCodeExtractor(ProcessingModule):
         }
     ]
 
+# Check that libraries wer loaded correctly
+    
     def initialize(self):
         if not HAVE_PEEPDF:
             raise ModuleInitializationError(self, "Missing dependency: peepdf")
         if not HAVE_PYZBAR:
             raise ModuleInitializationError(self, "Missing dependency: pyzbar")
+          
+""" def file_sha256(filepath):
+        sha256 = hashlib.sha256()
+
+        with open(filepath, 'rb') as f:
+            while True:
+                data = f.read(1000000)
+                if not data:
+                    break
+                sha256.update(data)
 
     def outdir(self):
         if self._outdir is None:
@@ -71,58 +70,40 @@ class QrCodeExtractor(ProcessingModule):
 
         sha256 = file_sha256(fpath)
         self.results['files'].add(sha256)
-
-
-#include document preview for pdf to be able to read the qrcode
-
-################################
-
-
-def extract_qr_code_by_opencv(filename):
-    """Read an image and read the QR code.
+"""
+    # For each, check if QRcode is found and extract potentiel URL
+    # TO-DO include document preview for pdf to be able to read the qrcode
     
-    Args:
-        filename (string): Path to file
-    
-    Returns:
-        qr (string): Value from QR code
-    """
-    
-    try:
-        img = cv2.imread(filename, 0)
-        detect = cv2.QRCodeDetector()
-        value, points, straight_qrcode = detect.detectAndDecode(img)
-        print(value)
-        return value
-    except:
-        return
-def extract_read_qr_code_by_pyzbar(filename):
-    """Read an image and read the QR code.
+    def each(self, target):
+        self._outdir = None
+        
+        # add ioc for the url decoded
+        if filetype == "url" and not target.startswith("http"):
+            target = "http://{}".format(target)
 
-    Args:
-        filename (string): Path to file
+        if filetype == "url":
+            self.add_ioc(target)
 
-    Returns:
-        qr (string): Value from QR code
-    """
+        # Read image target
+        image = cv2.imread(target, 0)
+        
+        # decode QRcode
+        
+        def extract_qr_code_by_opencv(target):
+            try:
+                detect = cv2.QRCodeDetector()
+                value, points, straight_qrcode = detect.detectAndDecode(image)
+                print(value)
+                return value
+            except:
+                return
 
-    try:
-        img = cv2.imread(filename, 0)
-        value = decode(img)
-        print(value)
-        return value
-    except:
-        return
-    
+        def extract_qr_code_by_pyzbar(target):
+            try:
+                value = decode(image)
+                print(value)
+                return value
+            except:
+                return
 
-#Include URL preview
-
-
-def main():
-    print("————PYZBAR————")
-	print(extract_read_qr_code_by_pyzbar(file))
-	print("————OPENCV————")
-	print(extract_qr_code_by_opencv(fie))
-
-if __name__ == "__main__":
-	main()
+#TO-DO Include call to URL preview

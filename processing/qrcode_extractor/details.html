@@ -1,103 +1,10 @@
 <div class="col-md-12">
         <div class="card">
             <div class="header">
-                <h4 class="title">Peepdf</h4>
+                <h4 class="title">QRcode Reader</h4>
                 <p class="category">Detailed Results</p>
             </div>
             <div class="content">
-                {% if results['/OpenAction'] %}
-                    <div class="close-alert alert alert-danger">
-                        The file uses <b>/OpenAction</b> to automatically execute code when the file is opened. Related Objects:
-                        {% for elt in results['/OpenAction'] %}
-                            <a href="#pdf-object-{{elt}}">{{elt}}</a>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-
-                {% if results['/AA'] %}
-                    <div class="close-alert alert alert-danger">
-                        The file uses <b>/AA</b> to automatically execute code. Related Objects:
-                        {% for elt in results['/AA'] %}
-                            <a href="#pdf-object-{{elt}}">{{elt}}</a>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-
-                {% if results['/Launch'] %}
-                    <div class="close-alert alert alert-danger">
-                        The file uses <b>/Launch</b> to execute a command. Related Objects:
-                        {% for elt in results['/Launch'] %}
-                            <a href="#pdf-object-{{elt}}">{{elt}}</a>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-
-                {% if results['/Names'] %}
-                    <div class="close-alert alert alert-warning">
-                        The file uses <b>/Names</b> which could be used to execute code automatically. Related Objects:
-                        {% for elt in results['/Names'] %}
-                            <a href="#pdf-object-{{elt}}">{{elt}}</a>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-
-                {% if results['/JS'] or results['/JavaScript'] %}
-                    <div class="close-alert alert alert-warning">
-                        The file contains javascript code (see extracted javascript below).
-                    </div>
-                {% endif %}
-
-                {% if results['/AcroForm'] or results['/XFA'] %}
-                    <div class="close-alert alert alert-warning">
-                        The file uses <b>/AcroForm</b> and / or <b>/XFA</b>. This could be used to execute code automatically. Related Objects:
-                        {% for elt in results['/AcroForm'] %}
-                            <a href="#pdf-object-{{elt}}">{{elt}}</a>
-                        {% endfor %}
-                        {% for elt in results['/XFA'] %}
-                            <a href="#pdf-object-{{elt}}">{{elt}}</a>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-
-                {% if results['/SubmitForm'] %}
-                    <div class="close-alert alert alert-warning">
-                        The file uses <b>/SubmitForm</b>. This could be used to send data to a remote web server. Related Objects:
-                        {% for elt in results['/SubmitForm'] %}
-                            <a href="#pdf-object-{{elt}}">{{elt}}</a>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-
-                {% if results['/RichMedia'] or results['/Flash'] %}
-                    <div class="close-alert alert alert-warning">
-                        The file uses rich media such as Flash. Related Objects:
-                        {% for elt in results['/RichMedia'] %}
-                            <a href="#pdf-object-{{elt}}">{{elt}}</a>
-                        {% endfor %}
-                        {% for elt in results['/Flash'] %}
-                            <a href="#pdf-object-{{elt}}">{{elt}}</a>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-
-                {% for vuln in results['vulns'] %}
-                    <div class="close-alert alert alert-warning">
-                        The file uses <b>{{vuln[0]}}</b>. This might be an indication of <b>{{vuln[2]|join(', ')}}</b>. Related Objects:
-                        {% for elt in vuln[1] %}
-                            <a href="#pdf-object-{{elt}}">{{elt}}</a>
-                        {% endfor %}
-                    </div>
-                {% endfor %}
-
-                {% if results.files %}
-                    <label>Extracted Files</label>
-                    <div class="labeled-content">
-                        {% for sha256 in results.files %}
-                            <div>{{sha256}}</div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-
                 {% if results.urls %}
                     <label>Extracted Links</label>
                     <div class="labeled-content">
@@ -106,24 +13,7 @@
                         {% endfor %}
                     </div>
                 {% endif %}
-
-                {% if results.javascript %}
-                    <label>Extracted Javascript</label>
-                    <div class="labeled-content">
-                        <pre><code>{{results.javascript}}</code></pre>
-                    </div>
-                {% endif %}
-
-                {% if results.objects %}
-                    <label>Extracted Objects</label>
-                    <div class="labeled-content">
-                    {% for id, content in results.objects|dictsort %}
-                        <div id="pdf-object-{{id}}">Object #{{id}}</div>
-                        <pre><code>{{content}}</code></pre>
-                    {% endfor %}
-                    </div>
-                {% endif %}
-
+                
                 {% if results.clean %}
                     <p>No suspicious object found</p>
                 {% endif %}
