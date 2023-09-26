@@ -1,21 +1,10 @@
-import os
-import hashlib
-from shutil import rmtree
+import glob
+import cv2
+import pathlib
+from pyzbar.pyzbar import decode
 
 from fame.core.module import ProcessingModule, ModuleInitializationError, ModuleExecutionError
 from fame.common.utils import tempdir
-
-try:
-    import peepdf
-    HAVE_PEEPDF = True
-except ImportError:
-    HAVE_PEEPDF = False
-
-try:
-    from jsbeautifier import beautify
-    HAVE_JSBEAUTIFY = True
-except ImportError:
-    HAVE_JSBEAUTIFY = False
 
 
 def file_sha256(filepath):
@@ -230,3 +219,52 @@ class Peepdf(ProcessingModule):
             self.skip_review()
 
         return True
+
+
+################################
+
+
+def extract_qr_code_by_opencv(filename):
+    """Read an image and read the QR code.
+    
+    Args:
+        filename (string): Path to file
+    
+    Returns:
+        qr (string): Value from QR code
+    """
+    
+    try:
+        img = cv2.imread(filename, 0)
+        detect = cv2.QRCodeDetector()
+        value, points, straight_qrcode = detect.detectAndDecode(img)
+        print(value)
+        return value
+    except:
+        return
+def extract_read_qr_code_by_pyzbar(filename):
+    """Read an image and read the QR code.
+
+    Args:
+        filename (string): Path to file
+
+    Returns:
+        qr (string): Value from QR code
+    """
+
+    try:
+        img = cv2.imread(filename, 0)
+        value = decode(img)
+        print(value)
+        return value
+    except:
+        return
+
+def main():
+    print("————PYZBAR————")
+	print(extract_read_qr_code_by_pyzbar(args.path))
+	print("————OPENCV————")
+	print(extract_qr_code_by_opencv(args.path))
+
+if __name__ == "__main__":
+	main()
