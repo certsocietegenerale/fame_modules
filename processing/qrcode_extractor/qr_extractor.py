@@ -22,7 +22,7 @@ class QrCodeExtractor(ProcessingModule):
     name = "qr_extractor"
     description = "Analyze files (via screenchot) and pictures (directly) to find QRcodes and decode them with two different libs."
     acts_on = ["png", "pdf", "word", "html", "excel", "powerpoint"]
-
+    triggered_by = "document_preview"
     config = [
         {
             "name": "skip_safe_file_review",
@@ -40,45 +40,43 @@ class QrCodeExtractor(ProcessingModule):
         if not HAVE_PYZBAR:
             raise ModuleInitializationError(self, "Missing dependency: pyzbar")
     
-    # For each, check if QRcode is found and extract potentiel URL
-    #   - TO-DO : include document preview for pdf to be able to read the qrcode
-    #               Or trigger the qrcode extractor after document preview
+# For each, check if QRcode is found and extract potentiel URL
+#   - TO-DO : include document preview for pdf to be able to read the qrcode
+#               Or trigger the qrcode extractor after document preview
+# possibly => mutualize Read image target
+    # decode QRcode
     
+    def extract_qr_code_by_opencv(target):
+        image = cv2.imread(target, 0)
+        try:
+            detect = cv2.QRCodeDetector()
+            value, points, straight_qrcode = detect.detectAndDecode(image)
+            print(value)
+            return value
+        except:
+            return
+
+    def extract_qr_code_by_pyzbar(target):
+        image = cv2.imread(target, 0)
+        try:
+            value = decode(image)
+            print(value)
+            return value
+        except:
+            return
+
     def each(self, target):
-        self._outdir = None
-        self.results = {
-            'files': set(),
-            'urls': set(), 
-            'other_objects': {}
-        }
+        self.results = {}
         
+        # Get QRcode
+        self.results[">PYZBAR"] = read_qr_code_pyzbar(target)
+        self.results[">OPENCV"] = read_qr_code_opencv(target)	    
         # add ioc for the url decoded
         #if filetype == "url" and not target.startswith("http"):
         #    target = "http://{}".format(target)
 
         #if filetype == "url":
         #    self.add_ioc(target)
-
-        # Read image target
-        image = cv2.imread(target, 0)
-        
-        # decode QRcode
-        
-        def extract_qr_code_by_opencv(target):
-            try:
-                detect = cv2.QRCodeDetector()
-                value, points, straight_qrcode = detect.detectAndDecode(image)
-                print(value)
-                return value
-            except:
-                return
-
-        def extract_qr_code_by_pyzbar(target):
-            try:
-                value = decode(image)
-                print(value)
-                return value
-            except:
-                return
+        return True
 
 #TO-DO Include call to URL preview
