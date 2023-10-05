@@ -20,7 +20,7 @@ class DocumentPreview(ProcessingModule):
 
     name = 'document_preview'
     description = 'Display pages of pdf and office files'
-    acts_on = ['pdf', 'word', 'powerpoint', 'excel', 'rtf']
+    acts_on = ['pdf', 'word', 'powerpoint', 'excel', 'rtf','png','jpeg']
 
     config = [
         {
@@ -48,7 +48,7 @@ class DocumentPreview(ProcessingModule):
         image_files.sort(key=natural_keys)
 
         for filename in image_files:
-            if filename.endswith('.jpeg'):
+            if filename.endswith('.jpeg') or filename.endswith('.png'):
                 # extract page number from filename
                 number = filename.split('_')[-1].split('.')[0]
                 self.add_support_file('page_#{}'.format(number), os.path.join(directory, filename))

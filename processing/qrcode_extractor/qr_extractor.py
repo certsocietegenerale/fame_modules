@@ -1,6 +1,7 @@
 import glob
 import pathlib
 import hashlib
+import pyzbar
 
 from fame.core.module import ProcessingModule, ModuleInitializationError, ModuleExecutionError
 from fame.common.utils import tempdir
@@ -22,7 +23,7 @@ class QrCodeExtractor(ProcessingModule):
     name = "qr_extractor"
     description = "Analyze files (via screenchot) and pictures (directly) to find QRcodes and decode them with two different libs."
     acts_on = ["png", "pdf", "word", "html", "excel", "powerpoint"]
-    triggered_by = "document_preview"
+    #triggered_by = "document_preview"
     config = [
         {
             "name": "skip_safe_file_review",
@@ -36,7 +37,7 @@ class QrCodeExtractor(ProcessingModule):
     
     def initialize(self):
         if not HAVE_CV2:
-            raise ModuleInitializationError(self, "Missing dependency: peepdf")
+            raise ModuleInitializationError(self, "Missing dependency: opencv2")
         if not HAVE_PYZBAR:
             raise ModuleInitializationError(self, "Missing dependency: pyzbar")
     
@@ -69,8 +70,8 @@ class QrCodeExtractor(ProcessingModule):
         self.results = {}
         
         # Get QRcode
-        self.results[">PYZBAR"] = read_qr_code_pyzbar(target)
-        self.results[">OPENCV"] = read_qr_code_opencv(target)	    
+        self.results[">PYZBAR"] = extract_qr_code_by_pyzbar(target)
+        self.results[">OPENCV"] = extract_qr_code_by_opencv(target)	    
         # add ioc for the url decoded
         #if filetype == "url" and not target.startswith("http"):
         #    target = "http://{}".format(target)
