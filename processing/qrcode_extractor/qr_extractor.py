@@ -23,7 +23,7 @@ class QrCodeExtractor(ProcessingModule):
     name = "qr_extractor"
     description = "Analyze files (via screenchot) and pictures (directly) to find QRcodes and decode them with two different libs."
     acts_on = ["png", "pdf", "word", "html", "excel", "powerpoint"]
-    #triggered_by = "document_preview"
+    triggered_by = "document_preview"
     config = [
         {
             "name": "skip_safe_file_review",
@@ -47,8 +47,8 @@ class QrCodeExtractor(ProcessingModule):
 # possibly => mutualize Read image target
     # decode QRcode
     
-    def extract_qr_code_by_opencv(target):
-        image = cv2.imread(target, 0)
+    def extract_qr_code_by_opencv(img):
+        image = cv2.imread(img, 0)
         try:
             detect = cv2.QRCodeDetector()
             value, points, straight_qrcode = detect.detectAndDecode(image)
@@ -57,8 +57,8 @@ class QrCodeExtractor(ProcessingModule):
         except:
             return
 
-    def extract_qr_code_by_pyzbar(target):
-        image = cv2.imread(target, 0)
+    def extract_qr_code_by_pyzbar(img):
+        image = cv2.imread(img, 0)
         try:
             value = decode(image)
             print(value)
@@ -70,12 +70,12 @@ class QrCodeExtractor(ProcessingModule):
         self.results = {}
         
         # Get QRcode
-        self.results[">PYZBAR"] = extract_qr_code_by_pyzbar(target)
-        self.results[">OPENCV"] = extract_qr_code_by_opencv(target)	    
-        # add ioc for the url decoded
+        self.results[">PYZBAR"] = self.extract_qr_code_by_pyzbar(target)
+        self.results[">OPENCV"] = self.extract_qr_code_by_opencv(target)	    
+        self.add_ioc(results)
+        #TO-DO add ioc for the url decoded only
         #if filetype == "url" and not target.startswith("http"):
         #    target = "http://{}".format(target)
-
         #if filetype == "url":
         #    self.add_ioc(target)
         return True
