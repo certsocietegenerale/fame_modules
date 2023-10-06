@@ -21,8 +21,8 @@ except ImportError:
 
 class QrCodeExtractor(ProcessingModule):
     name = "qr_extractor"
-    description = "Analyze files (via screenchot) and pictures (directly) to find QRcodes and decode them with two different libs."
-    acts_on = ["png", "pdf", "word", "html", "excel", "powerpoint"]
+    description = "Analyze files (via docement preview) to find QRcodes and decode them with two different libs."
+    acts_on = ["png","jpg","jpeg", "pdf", "word", "html", "excel", "powerpoint"]
     triggered_by = "document_preview"
     config = [
         {
