@@ -50,8 +50,9 @@ class MSG(ProcessingModule):
     def extract_urls(self, mail):
         regex_url = r"\w+:(\/\/)[^\s]+"
         reg = re.compile(regex_url)
-        for match in reg.finditer(mail.body):
-            self.add_ioc(match.group(0).strip(">"))
+        if mail.body:
+            for match in reg.finditer(mail.body):
+                self.add_ioc(match.group(0).strip(">"))
 
     def register_header(self, header, outdir):
         fpath = os.path.join(outdir, '__header')
