@@ -45,7 +45,10 @@ File Permissions""",
                 stderr=True,
                 remove=True))
         except (docker.errors.ContainerError, docker.errors.APIError) as e:
-            self.parse_output(e.stderr)
+            if hasattr(e, 'stderr'):
+                self.log('error', e.stderr)
+            elif hasattr(e, 'explanation'):
+                self.log('error', e.explanation)
 
     def parse_output(self, out):
         out = out.decode('utf-8', errors='replace')

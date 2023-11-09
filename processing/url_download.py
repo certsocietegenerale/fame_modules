@@ -3,7 +3,7 @@ import requests
 from cgi import parse_header
 
 from fame.core.module import ProcessingModule
-from fame.common.utils import tempdir
+from fame.common.utils import tempdir, sanitize_filename
 from fame.common.exceptions import ModuleExecutionError
 
 
@@ -33,13 +33,13 @@ class URLDownload(ProcessingModule):
             if not filename:
                 filename = "no_filename"
 
-            filepath = os.path.join(tmpdir, filename)
+            filepath = os.path.join(tmpdir, sanitize_filename(filename, 'downloaded_file'))
 
             with open(filepath, 'wb') as fd:
                 for chunk in response.iter_content(1024):
                     fd.write(chunk)
 
-            self.add_extracted_file(filepath)
+            self.add_extracted_file(filepath, filename)
             self.add_ioc(target, 'payload_delivery')
 
             return True
