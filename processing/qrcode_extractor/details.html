@@ -1,22 +1,18 @@
-<div class="col-md-12">
+{% if results %}
+    <div class="col-md-12">
         <div class="card">
             <div class="header">
                 <h4 class="title">QRcode Reader</h4>
                 <p class="category">Detailed Results</p>
             </div>
             <div class="content">
-                {% if results.urls %}
-                    <label>Extracted Links</label>
+                    <label>Extracted Data</label>
                     <div class="labeled-content">
-                        {% for url in results.urls %}
-                            <div>{{url}}</div>
+                        {% for data in results %}
+                            <div>{{data}}</div>
                         {% endfor %}
                     </div>
-                {% endif %}
-                
-                {% if results.clean %}
-                    <p>No suspicious object found</p>
-                {% endif %}
             </div>
         </div>
     </div>
+{% endif %}

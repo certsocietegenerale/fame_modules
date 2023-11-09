@@ -2,7 +2,6 @@ import argparse
 import os
 from pdf2image import convert_from_path
 import re
-import cv2
 
 
 def pdftoimages(target, max_pages):
@@ -37,6 +36,7 @@ def libreofficeconversion(args):
         print('error: libreoffice could not convert file to PDF')
         return False
 
+
 def main(args):
 
     # if office file, convert to pdf file with libreoffice library
@@ -48,10 +48,6 @@ def main(args):
         pdftoimages(args.target, args.max_pages)
     # if another type
     # try to convert to pdf with libreoffice
-    elif args.target_type == 'jpg' or args.target_type == 'png' or args.target_type == 'jpeg':
-        #cv2.imread(args, cv2.IMREAD_ANYCOLOR)
-        cv2.imwrite('./output/output_1.jpeg')
-        pass
     else:
         print('warning: Unsupported target file')
         print('warning: libreoffice will try to convert the file to PDF')

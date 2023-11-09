@@ -1,2 +1,1 @@
-opencv-python==4.8.0.76
-pyzbar==0.1.9
+docker==6.1.3
