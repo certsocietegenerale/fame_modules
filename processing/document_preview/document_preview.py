@@ -52,6 +52,7 @@ class DocumentPreview(ProcessingModule):
                 # extract page number from filename
                 number = filename.split('_')[-1].split('.')[0]
                 self.add_support_file('page_#{}'.format(number), os.path.join(directory, filename))
+                self.register_files('jpeg', os.path.join(directory, filename))
                 extracted_images = True
 
         return extracted_images

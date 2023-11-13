@@ -70,6 +70,7 @@ class UrlPreview(ProcessingModule):
 
         if os.path.exists(filepath) and os.path.isfile(filepath):
             self.add_support_file("preview", filepath)
+            self.register_files('png', filepath)
             return True
         else:
             return False

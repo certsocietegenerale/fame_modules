@@ -1,0 +1,18 @@
+{% if results %}
+    <div class="col-md-12">
+        <div class="card">
+            <div class="header">
+                <h4 class="title">QRcode Reader</h4>
+                <p class="category">Detailed Results</p>
+            </div>
+            <div class="content">
+                    <label>Extracted Data</label>
+                    <div class="labeled-content">
+                        {% for data in results %}
+                            <div>{{data}}</div>
+                        {% endfor %}
+                    </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
