@@ -86,7 +86,7 @@ class Yeti(ThreatIntelligenceModule):
         else:
             result = r.json()
             id = result['id']
-            r = self._yeti_request(f"v2/observable/{id}/context", {'context': {'analysis_id': str(analysis['_id'])}, 'source': 'FAME' } ) 
+            r = self._yeti_request(f"v2/observables/{id}/context", {'context': {'analysis_id': str(analysis['_id'])}, 'source': 'FAME' } ) 
         
 
     def _yeti_request(self, url, data):
