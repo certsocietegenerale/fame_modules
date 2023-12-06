@@ -95,7 +95,8 @@ class Yeti(ThreatIntelligenceModule):
         if self.user == "":
             r = requests.post(self.url + url,
                               json=data,
-                              headers=headers)
+                              headers=headers,
+                              verify=False)
         else:
             r = requests.post(self.url + url,
                               json=data,
