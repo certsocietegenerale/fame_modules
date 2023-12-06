@@ -75,7 +75,7 @@ class Yeti(ThreatIntelligenceModule):
         except requests.HTTPError:
             if r.status_code == 400:
                 analysis.log("warning", "Could not submit observable \"%s\" to Yeti, observable already exists" % (ioc,))
-            elif .status_code == 422:
+            elif r.status_code == 422:
                 analysis.log("error", "Could not submit IOC \"%s\" to Yeti, \"not a viable data type\" (aka Yeti does not recognize the format the data)" % (ioc,))
             else:
                 import traceback
