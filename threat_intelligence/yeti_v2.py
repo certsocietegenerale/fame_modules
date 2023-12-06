@@ -72,14 +72,14 @@ class Yeti(ThreatIntelligenceModule):
     def ioc_submission(self, analysis, ioc, tags):
         try:
             r = self._yeti_request('v2/observables/', {'type': 'guess', 'value': ioc, 'tags': tags.split(',')}) #Type is mandatory, guess is not converted to proper type
-        except requests.HTTPError:
-            if r.status_code == 400:
-                analysis.log("warning", "Could not submit observable \"%s\" to Yeti, observable already exists" % (ioc,))
-            elif r.status_code == 422:
-                analysis.log("error", "Could not submit IOC \"%s\" to Yeti, \"not a viable data type\" (aka Yeti does not recognize the format the data)" % (ioc,))
+        except requests.HTTPError as e:
+            if e.response.status_code == 400:
+                analysis.log("warning", "Could not submit observable \"%s\" to Yeti 2v, observable already exists" % (ioc,))
+            elif e.response.status_code == 422:
+                analysis.log("error", "Could not submit IOC \"%s\" to Yeti v2, \"not a viable data type\" (aka Yeti does not recognize the format the data)" % (ioc,))
             else:
                 import traceback
-                analysis.log("warning", "Could not submit IOC \"%s\" to Yeti, HTTP status code: %d" % (ioc, r.status_code))
+                analysis.log("warning", "Could not submit IOC \"%s\" to Yeti v2, HTTP status code: %d" % (ioc, e.response.status_code))
                 analysis.log("debug", traceback.format_exc())
         else:
             result = r.json()
