@@ -81,6 +81,8 @@ class Yeti(ThreatIntelligenceModule):
                 import traceback
                 analysis.log("warning", "Could not submit IOC \"%s\" to Yeti v2, HTTP status code: %d" % (ioc, e.response.status_code))
                 analysis.log("debug", traceback.format_exc())
+        except requests.ConnectTimeout:
+            analysis.log("error", "Timeout connecting to Yeti v2")
         else:
             result = r.json()
             id = result['id']
