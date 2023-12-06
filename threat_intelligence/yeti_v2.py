@@ -57,28 +57,35 @@ class Yeti(ThreatIntelligenceModule):
         results = r.json()
         for result in results['known']:
             if result['value'] == ioc:
-                tags = [tag['name'] for tag in result['tags']]
+                tags = result['tags'].keys()
                 break
 
         for result in results['matches']: 
-            if result['observable'] == ioc: #Verify if observable exists
+            if result[0] == ioc:
                 indicators.append({
-                    'name': result['name'],
-                    'description': result['description']
+                    'name': result[1]['name'],
+                    'description': result[1]['description']
                 })
 
         return tags, indicators
 
     def ioc_submission(self, analysis, ioc, tags):
         try:
-            r = self._yeti_request('v2/observables/', {'value': ioc, 'source': 'fame', 'tags': tags.split(',')}) #source is unused
+            r = self._yeti_request('v2/observables/', {'type': 'guess', 'value': ioc, 'tags': tags.split(',')}) #Type is mandatory, guess is not converted to proper type
         except requests.HTTPError:
             if r.status_code == 400:
-                analysis.log("warning", "Could not submit IOC \"%s\" to Yeti, \"not a viable data type\" (aka Yeti does not recognize the format the data)" % (ioc,))
+                analysis.log("warning", "Could not submit observable \"%s\" to Yeti, observable already exists" % (ioc,))
+            elif .status_code == 422:
+                analysis.log("error", "Could not submit IOC \"%s\" to Yeti, \"not a viable data type\" (aka Yeti does not recognize the format the data)" % (ioc,))
             else:
                 import traceback
                 analysis.log("warning", "Could not submit IOC \"%s\" to Yeti, HTTP status code: %d" % (ioc, r.status_code))
                 analysis.log("debug", traceback.format_exc())
+        else:
+            result = r.json()
+            id = result['id']
+            r = self._yeti_request(f"v2/{id}/context", {'context': {'analysis_id': analysis._id}, 'source': 'FAME' } ) 
+        
 
     def _yeti_request(self, url, data):
         headers = {'accept': 'application/json'}
