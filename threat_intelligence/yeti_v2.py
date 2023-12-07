@@ -70,7 +70,7 @@ class Yeti(ThreatIntelligenceModule):
 
     def ioc_submission(self, analysis, ioc, tags):
         try:
-            r = self._yeti_request('v2/observables/', {'type': 'guess', 'value': ioc, 'tags': tags.split(',')}) #Type is mandatory, guess is not converted to proper type
+            r = self._yeti_request('v2/observables/', {'type': 'guess', 'value': ioc, 'tags': tags.remove('redirection').split(',')}) #Type is mandatory, guess is not converted to proper type
         except requests.HTTPError as e:
             if e.response.status_code == 400:
                 analysis.log("warning", f"Could not submit observable \"{ioc}\" to Yeti 2v, observable already exists")
@@ -83,7 +83,7 @@ class Yeti(ThreatIntelligenceModule):
         else:
             result = r.json()
             obsid = result['id']
-            r = self._yeti_request(f"v2/observables/{obsid}/context", {'context': {'analysis_id': str(analysis['_id']), 'analyst': str(analysis['analyst']) }, 'source': 'FAME' })
+            r = self._yeti_request(f"v2/observables/{obsid}/context", {'context': {'analysis_id': str(analysis['_id']) }, 'source': 'FAME' })
 
     def _yeti_request(self, url, data):
         headers = {'accept': 'application/json'}
