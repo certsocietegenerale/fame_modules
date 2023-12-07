@@ -9,8 +9,8 @@ except ImportError:
 
 
 class Yeti(ThreatIntelligenceModule):
-    name = "Yeti API v2"
-    description = "Submit observables to YETI API in order to get matching tags and indicators."
+    name = "Yeti v2"
+    description = "Submit observables to YETI v2 in order to get matching tags and indicators."
 
     config = [
         {
@@ -70,7 +70,7 @@ class Yeti(ThreatIntelligenceModule):
 
     def ioc_submission(self, analysis, ioc, tags):
         try:
-            r = self._yeti_request('v2/observables/', {'type': 'guess', 'value': ioc, 'tags': tags.remove('redirection').split(',')}) #Type is mandatory, guess is not converted to proper type
+            r = self._yeti_request('v2/observables/', {'type': 'guess', 'value': ioc, 'tags': tags.split(',').remove('redirection')}) #Type is mandatory, guess is not converted to proper type
         except requests.HTTPError as e:
             if e.response.status_code == 400:
                 analysis.log("warning", f"Could not submit observable \"{ioc}\" to Yeti 2v, observable already exists")
