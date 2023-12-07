@@ -70,6 +70,7 @@ class Yeti(ThreatIntelligenceModule):
 
     def ioc_submission(self, analysis, ioc, tags):
         try:
+            analysis.log("info", f"origin tags {tags}")
             tag_list = tags.split(',')
             analysis.log("info", f" after split {tag_list}")
             try:
