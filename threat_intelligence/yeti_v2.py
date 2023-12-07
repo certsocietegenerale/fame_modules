@@ -75,6 +75,7 @@ class Yeti(ThreatIntelligenceModule):
                 tag_list.remove('redirection')
             except ValueError:
                 pass
+            analysis.log("info", tag_list)
             r = self._yeti_request('v2/observables/add_text', { 'text': ioc, 'tags': tag_list}) #Type is mandatory, guess is not converted to proper type
         except requests.HTTPError as e:
             if e.response.status_code == 400:
