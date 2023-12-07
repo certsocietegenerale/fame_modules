@@ -70,17 +70,12 @@ class Yeti(ThreatIntelligenceModule):
 
     def ioc_submission(self, analysis, ioc, tags):
         try:
-            analysis.log("info", f"origin tags {tags}")
             tag_list = tags.split(',')
-            analysis.log("info", f" after split {tag_list}")
             try:
                 tag_list.remove('redirection')
-                analysis.log("info", f" after remove {tag_list}")
             except ValueError:
-                analysis.log("info", "Value error")
                 pass
-            analysis.log("info", f" After Try/catch{tag_list}")
-            r = self._yeti_request('v2/observables/add_text', { 'text': ioc, 'tags': tag_list}) #Type is mandatory, guess is not converted to proper type
+            r = self._yeti_request('v2/observables/add_text', { 'text': ioc, 'tags': tag_list})
         except requests.HTTPError as e:
             if e.response.status_code == 400:
                 analysis.log("warning", f"Could not submit observable, error message: \"{ e.response.detail }\"")
@@ -99,8 +94,7 @@ class Yeti(ThreatIntelligenceModule):
         if self.user == "":
             r = requests.post(self.url + url,
                               json=data,
-                              headers=headers,
-                              verify=False)
+                              headers=headers)
         else:
             r = requests.post(self.url + url,
                               json=data,
