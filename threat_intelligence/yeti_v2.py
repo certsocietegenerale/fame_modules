@@ -9,8 +9,8 @@ except ImportError:
 
 
 class Yeti(ThreatIntelligenceModule):
-    name = "Yeti version 2"
-    description = "Submit observables to YETI v2 in order to get matching tags and indicators."
+    name = "Yeti API v2"
+    description = "Submit observables to YETI API in order to get matching tags and indicators."
 
     config = [
         {
@@ -41,7 +41,6 @@ class Yeti(ThreatIntelligenceModule):
     def initialize(self):
         if not HAVE_REQUESTS:
             raise ModuleInitializationError(self, "Missing dependency: requests")
-
         return True
 
     def ioc_lookup(self, ioc):
@@ -60,7 +59,7 @@ class Yeti(ThreatIntelligenceModule):
                 tags = result['tags'].keys()
                 break
 
-        for result in results['matches']: 
+        for result in results['matches']:
             if result[0] == ioc:
                 indicators.append({
                     'name': result[1]['name'],
@@ -74,20 +73,17 @@ class Yeti(ThreatIntelligenceModule):
             r = self._yeti_request('v2/observables/', {'type': 'guess', 'value': ioc, 'tags': tags.split(',')}) #Type is mandatory, guess is not converted to proper type
         except requests.HTTPError as e:
             if e.response.status_code == 400:
-                analysis.log("warning", "Could not submit observable \"%s\" to Yeti 2v, observable already exists" % (ioc,))
+                analysis.log("warning", f"Could not submit observable \"{ioc}\" to Yeti 2v, observable already exists")
             elif e.response.status_code == 422:
-                analysis.log("error", "Could not submit IOC \"%s\" to Yeti v2, \"not a viable data type\" (aka Yeti does not recognize the format the data)" % (ioc,))
+                analysis.log("error", f"Could not submit IOC \"{ioc}\" to Yeti v2, \"not a viable data type\" (aka Yeti does not recognize the format the data)")
             else:
-                import traceback
-                analysis.log("warning", "Could not submit IOC \"%s\" to Yeti v2, HTTP status code: %d" % (ioc, e.response.status_code))
-                analysis.log("debug", traceback.format_exc())
+                analysis.log("error", f"Could not submit IOC \"{ioc}\" to Yeti v2, HTTP status code: {e.response.status_code}")
         except requests.ConnectTimeout:
             analysis.log("error", "Timeout connecting to Yeti v2")
         else:
             result = r.json()
-            id = result['id']
-            r = self._yeti_request(f"v2/observables/{id}/context", {'context': {'analysis_id': str(analysis['_id'])}, 'source': 'FAME' } ) 
-        
+            obsid = result['id']
+            r = self._yeti_request(f"v2/observables/{obsid}/context", {'context': {'analysis_id': str(analysis['_id']), 'analyst': str(analysis['analyst']) }, 'source': 'FAME' })
 
     def _yeti_request(self, url, data):
         headers = {'accept': 'application/json'}
