@@ -75,14 +75,10 @@ class Yeti(ThreatIntelligenceModule):
                 tag_list.remove('redirection')
             except ValueError:
                 pass
-            r = self._yeti_request('v2/observables/', {'type': 'guess', 'value': ioc, 'tags': tag_list}) #Type is mandatory, guess is not converted to proper type
+            r = self._yeti_request('v2/observables/add_text', { 'text': ioc, 'tags': tag_list}) #Type is mandatory, guess is not converted to proper type
         except requests.HTTPError as e:
             if e.response.status_code == 400:
-                analysis.log("warning", f"Could not submit observable \"{ioc}\" to Yeti 2v, observable already exists")
-            elif e.response.status_code == 422:
-                analysis.log("error", f"Could not submit IOC \"{ioc}\" to Yeti v2, \"not a viable data type\" (aka Yeti does not recognize the format the data)")
-            else:
-                analysis.log("error", f"Could not submit IOC \"{ioc}\" to Yeti v2, HTTP status code: {e.response.status_code}")
+                analysis.log("warning", f"Could not submit observable, error message: \"{ e.response.detail }\"")
         except requests.ConnectTimeout:
             analysis.log("error", "Timeout connecting to Yeti v2")
         else:
