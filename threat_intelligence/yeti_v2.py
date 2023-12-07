@@ -70,6 +70,8 @@ class Yeti(ThreatIntelligenceModule):
 
     def ioc_submission(self, analysis, ioc, tags):
         try:
+            analysis.log("info", tags.split(','))
+            analysis.log("info", tags.split(',').remove('redirection'))
             r = self._yeti_request('v2/observables/', {'type': 'guess', 'value': ioc, 'tags': tags.split(',').remove('redirection')}) #Type is mandatory, guess is not converted to proper type
         except requests.HTTPError as e:
             if e.response.status_code == 400:
