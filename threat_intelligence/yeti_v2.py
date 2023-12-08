@@ -9,6 +9,7 @@ except ImportError:
 
 
 class Yetiv2(ThreatIntelligenceModule):
+    """Implements Yetiv2 Threat Intelligence module"""
     name = "Yeti v2"
     description = "Submit observables to YETI v2 in order to get matching tags and indicators."
 
@@ -39,11 +40,13 @@ class Yetiv2(ThreatIntelligenceModule):
     ]
 
     def initialize(self):
+        """Initialize module"""
         if not HAVE_REQUESTS:
             raise ModuleInitializationError(self, "Missing dependency: requests")
         return True
 
     def ioc_lookup(self, ioc):
+        """Enrich the analysis with data from Yeti"""
         tags = []
         indicators = []
 
@@ -69,6 +72,7 @@ class Yetiv2(ThreatIntelligenceModule):
         return tags, indicators
 
     def ioc_submission(self, analysis, ioc, tags):
+        """Submit IOCs and tags to Yeti"""
         try:
             tag_list = tags.split(',')
             try:
@@ -78,13 +82,16 @@ class Yetiv2(ThreatIntelligenceModule):
             r = self._yeti_request('v2/observables/add_text', { 'text': ioc, 'tags': tag_list})
         except requests.HTTPError as e:
             if e.response.status_code == 400:
-                analysis.log("warning", f"Could not submit observable, error message: \"{ e.response.detail }\"")
+                analysis.log("warning",
+                             f"Could not submit observable, error message: {e.response.detail}")
         except requests.ConnectTimeout:
             analysis.log("error", "Timeout connecting to Yeti v2")
         else:
             result = r.json()
             obsid = result['id']
-            r = self._yeti_request(f"v2/observables/{obsid}/context", {'context': {'analysis_id': str(analysis['_id']) }, 'source': 'FAME' })
+            r = self._yeti_request(f"v2/observables/{obsid}/context",
+                                   {'context': {'analysis_id': str(analysis['_id'])},
+                                   'source': 'FAME' })
 
     def _yeti_request(self, url, data):
         headers = {'accept': 'application/json'}
@@ -94,12 +101,14 @@ class Yetiv2(ThreatIntelligenceModule):
         if self.user == "":
             r = requests.post(self.url + url,
                               json=data,
-                              headers=headers)
+                              headers=headers,
+                              timeout=60)
         else:
             r = requests.post(self.url + url,
                               json=data,
                               headers=headers,
-                              auth=requests.auth.HTTPBasicAuth(self.user, self.password))
+                              auth=requests.auth.HTTPBasicAuth(self.user, self.password),
+                              timeout=60)
         r.raise_for_status()
 
         return r
