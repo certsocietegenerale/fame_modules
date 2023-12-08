@@ -8,7 +8,7 @@ except ImportError:
     HAVE_REQUESTS = False
 
 
-class Yeti(ThreatIntelligenceModule):
+class Yetiv2(ThreatIntelligenceModule):
     name = "Yeti v2"
     description = "Submit observables to YETI v2 in order to get matching tags and indicators."
 
