@@ -7,7 +7,7 @@ class QrCodeExtractor(ProcessingModule):
     name = "qr_extractor"
     description = "find QRcodes in images and decode them"
     acts_on = ["png", "jpeg", "bmp", "webp", "avif"]
-    triggered_by = "*_preview"
+    triggered_by = ["*_preview", "msg"]
     config = []
 
     def initialize(self):

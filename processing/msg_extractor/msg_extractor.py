@@ -1,6 +1,7 @@
 # coding: utf-8
 import os
 import re
+import mimetypes
 
 try:
     # Use https://github.com/mattgwwalker/msg-extractor to read .msg files
@@ -36,7 +37,7 @@ class MSG(ProcessingModule):
             if attachment.type == msg_enums.AttachmentType.MSG:
                 try:
                     attachment.save(customPath=outdir, useMsgFilename=True)
-                except extract_msg.exceptions.DataNotFoundError:
+                except (extract_msg.exceptions.DataNotFoundError, AttributeError):
                     continue
 
                 folder = os.path.splitext(os.path.split(attachment.data.filename)[1])[0]
@@ -67,8 +68,11 @@ class MSG(ProcessingModule):
 
     def add_attachments(self, paths):
         for path in paths:
-            self.add_extracted_file(path)
-            self.add_support_file(path)
+            mime = mimetypes.guess_type(path)[0]
+            if mime in ['image/jpeg', 'image/png', 'image/bmp', 'image/avif']:
+                self.register_files(mime.split('/')[1], path)
+            elif mime not in ['text/plain']:
+                self.add_extracted_file(path)
 
     def each(self, target):
         mail = extract_msg.Message(target)
@@ -92,5 +96,6 @@ class MSG(ProcessingModule):
 
             #extract urls
             self.extract_urls(mail)
+            return True
         else:
             self.log('error', 'extract_msg could not parse message')
