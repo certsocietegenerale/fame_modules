@@ -34,7 +34,10 @@ class MSG(ProcessingModule):
 
         for attachment in attachments:
             if attachment.type == msg_enums.AttachmentType.MSG:
-                attachment.save(customPath=outdir, useMsgFilename=True)
+                try:
+                    attachment.save(customPath=outdir, useMsgFilename=True)
+                except extract_msg.exceptions.DataNotFoundError:
+                    continue
 
                 folder = os.path.splitext(os.path.split(attachment.data.filename)[1])[0]
                 folder = msg_utils.prepareFilename(folder)[:256]
@@ -65,6 +68,7 @@ class MSG(ProcessingModule):
     def add_attachments(self, paths):
         for path in paths:
             self.add_extracted_file(path)
+            self.add_support_file(path)
 
     def each(self, target):
         mail = extract_msg.Message(target)
