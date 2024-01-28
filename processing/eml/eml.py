@@ -35,7 +35,8 @@ class EML(ProcessingModule):
     def extract_urls(self, mail):
         regex_url = r"\w+:(\/\/)[^\s>\"\'\"]+"
         reg = re.compile(regex_url)
-        content = quopri.decodestring(mail.as_string()).decode("utf-8", errors="replace")
+        email_as_string = mail.as_string().encode('ascii',errors='ignore').decode()
+        content = quopri.decodestring(email_as_string).decode("utf-8", errors="replace")
         for match in reg.finditer(content):
             self.add_ioc(match.group(0))
 
