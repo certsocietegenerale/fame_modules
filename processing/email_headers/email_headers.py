@@ -93,6 +93,10 @@ class EmailHeader(ProcessingModule):
             r = re.findall("^(.*?)\s*\(", line)
             if r:
                 r = dateutil.parser.parse(r[0])
+            else:
+                r = re.findall('\s*?(.+) UTC', line)
+                if r:
+                    r = dateutil.parser.parse(r[0])
         return r
 
     # This code is originally from https://github.com/lnxg33k/MHA
@@ -140,25 +144,25 @@ class EmailHeader(ProcessingModule):
                         line[0],
                         re.DOTALL | re.X,
                     )
+                if data:
+                    data = [x.replace("\n", " ") for x in list(map(str.strip, data[0]))]
+                    timeline = [
+                        {
+                            "order": str(index - 1),
+                            "delay": "",
+                            "from": data[0],
+                            "to": data[1],
+                            "protocol": data[2],
+                            "timestamp": org_time.strftime("%m/%d/%Y %I:%M:%S %p"),
+                        }
+                    ] + timeline
 
-                data = [x.replace("\n", " ") for x in list(map(str.strip, data[0]))]
-                timeline = [
-                    {
-                        "order": str(index - 1),
-                        "delay": "",
-                        "from": data[0],
-                        "to": data[1],
-                        "protocol": data[2],
-                        "timestamp": org_time.strftime("%m/%d/%Y %I:%M:%S %p"),
-                    }
-                ] + timeline
-
-                if last_timestamp:
-                    timeline[1]["delay"] = self.delay_to_string(
-                        relativedelta.relativedelta(last_timestamp, org_time)
-                    )
-                last_timestamp = org_time
-                index -= 1
+                    if last_timestamp:
+                        timeline[1]["delay"] = self.delay_to_string(
+                            relativedelta.relativedelta(last_timestamp, org_time)
+                        )
+                    last_timestamp = org_time
+                    index -= 1
 
         return timeline
 
