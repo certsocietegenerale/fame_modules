@@ -1,2 +1,2 @@
 pdf2image==1.16.0
-Pillow==10.0.1
+Pillow>=10.2.0
