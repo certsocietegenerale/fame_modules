@@ -116,7 +116,10 @@ class Lookyloo(ProcessingModule):
         tries = 0
         while (status == 0 or status == 2) and tries < 10 :
             time.sleep(5)
-            status = myinstance.get_status(uuid)["status_code"]
+            try:
+                status = myinstance.get_status(uuid)["status_code"]
+            except requests.exceptions.JSONDecodeError as e:
+                pass
             tries = tries + 1
 
         if status != 1:
