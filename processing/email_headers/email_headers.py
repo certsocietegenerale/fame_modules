@@ -108,8 +108,10 @@ class EmailHeader(ProcessingModule):
             for i in range(len(received)):
                 if ";" in received[i]:
                     line = received[i].split(";")
-                else:
+                elif "\r\n" in received[i]:
                     line = received[i].split("\r\n")
+                else:
+                    line = received[i].split("\n")
                 line = list(map(str.strip, line))
                 line = [x.replace("\r\n", "") for x in line]
 
