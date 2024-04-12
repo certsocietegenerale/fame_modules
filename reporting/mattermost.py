@@ -44,9 +44,7 @@ class Mattermost(ReportingModule):
             return False
 
     def done(self, analysis):
-        string = "Just finished analysis on `{0}`\n".format(
-            defang(", ".join(analysis._file["names"]))
-        )
+        string = "Just finished analysis on `{0}`\n".format(", ".join(analysis._file["names"]))
 
         if analysis["modules"]:
             string += "Selected Modules: {}\n".format(', '.join(analysis['modules']))
@@ -64,7 +62,7 @@ class Mattermost(ReportingModule):
             string += "|:-----------|:-----|\n"
 
             for ioc in analysis["iocs"]:
-                string += "|`{}`|{}|\n".format(defang(ioc['value']), ', '.join(ioc['tags']))
+                string += "|`{}`|{}|\n".format(ioc['value'], ', '.join(ioc['tags']))
 
         string += "\n| Module | Status |\n"
         string += "|:-------|:------:|\n"
