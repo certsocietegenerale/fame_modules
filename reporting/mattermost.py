@@ -28,7 +28,13 @@ class Mattermost(ReportingModule):
             "name": "fame_base_url",
             "type": "str",
             "description": "Base URL of your FAME instance, as you want it to appear in links.",
-        },
+            },
+        {
+            "name": "defang",
+            "type": "bool",
+            "default": "true",
+            "description": "Uncheck if you don't want to defang observables",
+        }
     ]
 
     def initialize(self):
