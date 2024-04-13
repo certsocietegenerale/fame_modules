@@ -55,16 +55,17 @@ class Mattermost(ReportingModule):
         else:
             return False
 
-    def cleanList(myList):
-        if self.defang:
-            myList = list(map(defang, myList))
-
-        if self.code:
-            myList = list(map(lambda s : '`' + s + '`', myList))
-        return myList
-
     def done(self, analysis):
-        string = "Just finished analysis on {0}\n".format(", ".join(cleanList(analysis._file["names"])))
+
+        def defangs(myList):
+            if self.defang:
+                myList = list(map(defang, myList))
+
+            if self.code:
+                myList = list(map(lambda s : '`' + s + '`', myList))
+            return myList
+
+        string = "Just finished analysis on {0}\n".format(", ".join(defangs(analysis._file["names"])))
 
         if analysis["modules"]:
             string += "Selected Modules: {}\n".format(', '.join(analysis['modules']))
@@ -82,8 +83,7 @@ class Mattermost(ReportingModule):
             string += "|:-----------|:-----|\n"
 
             for ioc in analysis["iocs"]:
-                cleanList(ioc['value'])
-                string += "|{}|{}|\n".format(cleanList(ioc['value']), ', '.join(ioc['tags']))
+                string += "|{}|{}|\n".format(defangs(ioc['value']), ', '.join(ioc['tags']))
 
         string += "\n| Module | Status |\n"
         string += "|:-------|:------:|\n"
