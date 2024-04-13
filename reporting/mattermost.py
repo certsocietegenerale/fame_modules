@@ -59,7 +59,7 @@ class Mattermost(ReportingModule):
         submitted = str(analysis._file["names"])
 
         if self.defang:
-            submitted = defang(analysis._file["names"])
+            submitted = defang(submitted)
 
         if self.code:
             submitted = '`' + submitted + '`'
