@@ -64,7 +64,7 @@ class Mattermost(ReportingModule):
         if self.code:
             submitted = str('`', submitted, '`')
 
-        string = "Just finished analysis on `{0}`\n".format(", ".join(submitted))
+        string = "Just finished analysis on {0}\n".format(", ".join(submitted))
 
         if analysis["modules"]:
             string += "Selected Modules: {}\n".format(', '.join(analysis['modules']))
@@ -82,7 +82,7 @@ class Mattermost(ReportingModule):
             string += "|:-----------|:-----|\n"
 
             for ioc in analysis["iocs"]:
-                string += "|`{}`|{}|\n".format(ioc['value'], ', '.join(ioc['tags']))
+                string += "|{}|{}|\n".format(ioc['value'], ', '.join(ioc['tags']))
 
         string += "\n| Module | Status |\n"
         string += "|:-------|:------:|\n"
