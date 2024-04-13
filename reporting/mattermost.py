@@ -61,12 +61,12 @@ class Mattermost(ReportingModule):
             if self.defang:
                 if isinstance(var, str):
                     var = defang(var)
-                else:
+                if isinstance(var, list):
                     var = list(map(defang, var))
             if self.code:
                 if isinstance(var, str):
                     var = '`' + var + '`'
-                else:
+                if isinstance(var, list):
                     var = list(map(lambda s : '`' + s + '`', var))
             return var
 
