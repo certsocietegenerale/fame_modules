@@ -33,7 +33,13 @@ class Mattermost(ReportingModule):
             "name": "defang",
             "type": "bool",
             "default": "true",
-            "description": "Uncheck if you don't want to defang observables",
+            "description": "check if you want to defang observables",
+        },
+        {
+            "name": "code",
+            "type": "bool",
+            "default": "true",
+            "description": "check if you  want to set observables as inline code, no emoji interpretation and no url links",
         }
     ]
 
@@ -50,7 +56,15 @@ class Mattermost(ReportingModule):
             return False
 
     def done(self, analysis):
-        string = "Just finished analysis on `{0}`\n".format(", ".join(analysis._file["names"]))
+        submitted = analysis._file["names"]
+
+        if self.defang:
+            submitted = defang(analysis._file["names"])
+
+        if self.code:
+            submitted = str('`', submitted, '`')
+
+        string = "Just finished analysis on `{0}`\n".format(", ".join(submitted))
 
         if analysis["modules"]:
             string += "Selected Modules: {}\n".format(', '.join(analysis['modules']))
