@@ -56,7 +56,7 @@ class Mattermost(ReportingModule):
             return False
 
     def done(self, analysis):
-        submitted = str(analysis._file["names"])
+        submitted = analysis._file["names"]
 
         if self.defang:
             submitted = defang(submitted)
@@ -82,7 +82,7 @@ class Mattermost(ReportingModule):
             string += "|:-----------|:-----|\n"
 
             for ioc in analysis["iocs"]:
-                string += "|`{}`|{}|\n".format(ioc['value'], ', '.join(ioc['tags']))
+                string += "|{}|{}|\n".format(ioc['value'], ', '.join(ioc['tags']))
 
         string += "\n| Module | Status |\n"
         string += "|:-------|:------:|\n"
