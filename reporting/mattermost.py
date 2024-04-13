@@ -57,13 +57,18 @@ class Mattermost(ReportingModule):
 
     def done(self, analysis):
 
-        def defangs(myList):
+        def defangs(var):
             if self.defang:
-                myList = list(map(defang, myList))
-
+                if type(var) is list:
+                    var = list(map(defang, var))
+                else:
+                    var = defang(var)
             if self.code:
-                myList = list(map(lambda s : '`' + s + '`', myList))
-            return myList
+                if type(var) is list:
+                    var = list(map(lambda s : '`' + s + '`', var))
+                else:
+                    var = '`' + var + '`'
+            return var
 
         string = "Just finished analysis on {0}\n".format(", ".join(defangs(analysis._file["names"])))
 
