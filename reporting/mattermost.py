@@ -57,13 +57,12 @@ class Mattermost(ReportingModule):
 
     def done(self, analysis):
         submitted = analysis._file["names"]
-
+        print(type(analysis._file["names"]))
         if self.defang:
             submitted = defang(submitted)
-
         if self.code:
             submitted = '`' + submitted + '`'
-        
+
         string = "Just finished analysis on {0}\n".format(", ".join(submitted))
 
         if analysis["modules"]:
