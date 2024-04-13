@@ -64,7 +64,7 @@ class Mattermost(ReportingModule):
         if self.code:
             submitted = '`' + submitted + '`'
         
-        string = "Just finished analysis on `{0}`\n".format(", ".join(submitted))
+        string = "Just finished analysis on {0}\n".format(", ".join(submitted))
 
         if analysis["modules"]:
             string += "Selected Modules: {}\n".format(', '.join(analysis['modules']))
