@@ -57,11 +57,12 @@ class Mattermost(ReportingModule):
 
     def done(self, analysis):
         submitted = analysis._file["names"]
-        print(type(analysis._file["names"]))
+
         if self.defang:
-            submitted = defang(submitted)
+            submitted = list(map(defang, submitted))
+
         if self.code:
-            submitted = '`' + submitted + '`'
+            submitted = list(map(lambda s : '`' + s + '`', submitted))
 
         string = "Just finished analysis on {0}\n".format(", ".join(submitted))
 
