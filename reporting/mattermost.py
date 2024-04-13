@@ -64,11 +64,7 @@ class Mattermost(ReportingModule):
         return myList
 
     def done(self, analysis):
-        submitted = analysis._file["names"]
-        iocs = analysis["iocs"]
-        cleanList(submitted) 
-        cleanList(iocs)
-        string = "Just finished analysis on {0}\n".format(", ".join(submitted))
+        string = "Just finished analysis on {0}\n".format(", ".join(cleanList(analysis._file["names"])))
 
         if analysis["modules"]:
             string += "Selected Modules: {}\n".format(', '.join(analysis['modules']))
@@ -86,7 +82,8 @@ class Mattermost(ReportingModule):
             string += "|:-----------|:-----|\n"
 
             for ioc in analysis["iocs"]:
-                string += "|{}|{}|\n".format(ioc['value'], ', '.join(ioc['tags']))
+                cleanList(ioc['value'])
+                string += "|{}|{}|\n".format(cleanList(ioc['value']), ', '.join(ioc['tags']))
 
         string += "\n| Module | Status |\n"
         string += "|:-------|:------:|\n"
