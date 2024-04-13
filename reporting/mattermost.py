@@ -39,7 +39,7 @@ class Mattermost(ReportingModule):
             "name": "code",
             "type": "bool",
             "default": "true",
-            "description": "check if you  want to set observables as inline code, no emoji interpretation and no url links",
+            "description": "check if you want to set observables as inline code, no emoji interpretation and no url links",
         }
     ]
 
@@ -62,7 +62,7 @@ class Mattermost(ReportingModule):
             submitted = defang(analysis._file["names"])
 
         if self.code:
-            submitted = str('`', submitted, '`')
+            submitted = '`' + submitted + '`'
 
         string = "Just finished analysis on {0}\n".format(", ".join(submitted))
 
