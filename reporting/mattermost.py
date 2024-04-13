@@ -39,7 +39,7 @@ class Mattermost(ReportingModule):
             "name": "code",
             "type": "bool",
             "default": "true",
-            "description": "check if you want to set observables as inline code, no emoji interpretation and no url links",
+            "description": "check if you  want to set observables as inline code, no emoji interpretation and no url links",
         }
     ]
 
@@ -56,15 +56,15 @@ class Mattermost(ReportingModule):
             return False
 
     def done(self, analysis):
-        submitted = analysis._file["names"]
+        submitted = str(analysis._file["names"])
 
         if self.defang:
             submitted = defang(analysis._file["names"])
 
         if self.code:
             submitted = '`' + submitted + '`'
-
-        string = "Just finished analysis on {0}\n".format(", ".join(submitted))
+        
+        string = "Just finished analysis on `{0}`\n".format(", ".join(submitted))
 
         if analysis["modules"]:
             string += "Selected Modules: {}\n".format(', '.join(analysis['modules']))
@@ -82,7 +82,7 @@ class Mattermost(ReportingModule):
             string += "|:-----------|:-----|\n"
 
             for ioc in analysis["iocs"]:
-                string += "|{}|{}|\n".format(ioc['value'], ', '.join(ioc['tags']))
+                string += "|`{}`|{}|\n".format(ioc['value'], ', '.join(ioc['tags']))
 
         string += "\n| Module | Status |\n"
         string += "|:-------|:------:|\n"
