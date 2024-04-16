@@ -30,16 +30,16 @@ class Mattermost(ReportingModule):
             "description": "Base URL of your FAME instance, as you want it to appear in links.",
             },
         {
-            "name": "defang",
+            "name": "defangReplace",
             "type": "bool",
             "default": "true",
-            "description": "check this box if you want to defang observables",
+            "description": "check this box if you want to defang observables using replacement. example : http is replaced by hxxp",
         },
         {
-            "name": "code",
+            "name": "defangCode",
             "type": "bool",
             "default": "true",
-            "description": "check this box if you want to write observables as inline code, you will not have any emoji interpretation or URL links",
+            "description": "check this box if you want to defang observables using inline code, it avoids to have interpretation like emojis and URL links",
         }
     ]
 
@@ -58,12 +58,12 @@ class Mattermost(ReportingModule):
     def done(self, analysis):
 
         def defangs(var):
-            if self.defang:
+            if self.defangReplace:
                 if isinstance(var, str):
                     var = defang(var)
                 if isinstance(var, list):
                     var = list(map(defang, var))
-            if self.code:
+            if self.defangCode:
                 if isinstance(var, str):
                     var = '`' + var + '`'
                 if isinstance(var, list):
