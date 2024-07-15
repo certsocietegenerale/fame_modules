@@ -28,7 +28,19 @@ class Mattermost(ReportingModule):
             "name": "fame_base_url",
             "type": "str",
             "description": "Base URL of your FAME instance, as you want it to appear in links.",
+            },
+        {
+            "name": "defangReplace",
+            "type": "bool",
+            "default": "true",
+            "description": "check this box if you want to defang observables using replacement. example : http is replaced by hxxp",
         },
+        {
+            "name": "defangCode",
+            "type": "bool",
+            "default": "true",
+            "description": "check this box if you want to defang observables using inline code, it avoids to have interpretation like emojis and URL links",
+        }
     ]
 
     def initialize(self):
@@ -44,9 +56,21 @@ class Mattermost(ReportingModule):
             return False
 
     def done(self, analysis):
-        string = "Just finished analysis on {0}\n".format(
-            defang(", ".join(analysis._file["names"]))
-        )
+
+        def defangs(var):
+            if self.defangReplace:
+                if isinstance(var, str):
+                    var = defang(var)
+                if isinstance(var, list):
+                    var = list(map(defang, var))
+            if self.defangCode:
+                if isinstance(var, str):
+                    var = '`' + var + '`'
+                if isinstance(var, list):
+                    var = list(map(lambda s : '`' + s + '`', var))
+            return var
+
+        string = "Just finished analysis on {0}\n".format(", ".join(defangs(analysis._file["names"])))
 
         if analysis["modules"]:
             string += "Selected Modules: {}\n".format(', '.join(analysis['modules']))
@@ -64,7 +88,7 @@ class Mattermost(ReportingModule):
             string += "|:-----------|:-----|\n"
 
             for ioc in analysis["iocs"]:
-                string += "|{}|{}|\n".format(defang(ioc['value']), ', '.join(ioc['tags']))
+                string += "|{}|{}|\n".format(defangs(ioc['value']), ', '.join(ioc['tags']))
 
         string += "\n| Module | Status |\n"
         string += "|:-------|:------:|\n"
