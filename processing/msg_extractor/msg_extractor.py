@@ -38,17 +38,17 @@ class MSG(ProcessingModule):
                 try:
                     attachment.save(customPath=outdir, useMsgFilename=True)
                 except (extract_msg.exceptions.DataNotFoundError, AttributeError):
-                    continue
+                    pass
+                else:
+                    folder = os.path.splitext(os.path.split(attachment.data.filename)[1])[0]
+                    folder = msg_utils.prepareFilename(folder)[:256]
+                    for file in os.listdir("%s%s%s" % (outdir, os.path.sep, folder)):
+                        paths.append("%s%s%s%s%s" % (outdir, os.path.sep, folder, os.path.sep, file))
 
-                folder = os.path.splitext(os.path.split(attachment.data.filename)[1])[0]
-                folder = msg_utils.prepareFilename(folder)[:256]
-                for file in os.listdir("%s%s%s" % (outdir, os.path.sep, folder)):
-                    paths.append("%s%s%s%s%s" % (outdir, os.path.sep, folder, os.path.sep, file))
-            else:
-                attachment.save(customPath=outdir)
+            attachment.save(customPath=outdir, extractEmbedded=True)
 
-                filename = msg_utils.inputToString(attachment.getFilename(), attachment.msg.stringEncoding)
-                paths.append("%s%s%s" % (outdir, os.path.sep, msg_utils.prepareFilename(filename)))
+            filename = msg_utils.inputToString(attachment.getFilename(), attachment.msg.stringEncoding)
+            paths.append("%s%s%s" % (outdir, os.path.sep, msg_utils.prepareFilename(filename)))
         return paths
 
     def extract_urls(self, mail):
