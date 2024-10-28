@@ -98,11 +98,6 @@ class Yetiv2(ThreatIntelligenceModule):
                               json=data,
                               headers=headers,
                               timeout=60)
-        r = requests.post(self.url + url,
-                              json=data,
-                              headers=headers,
-                              auth=requests.auth.HTTPBasicAuth(self.user, self.password),
-                              timeout=60)
         r.raise_for_status()
 
         return r
