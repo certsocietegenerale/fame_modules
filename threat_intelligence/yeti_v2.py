@@ -42,7 +42,7 @@ class Yetiv2(ThreatIntelligenceModule):
             "observables": [ioc]
         }
 
-        r = self._yeti_request('v2/graph/match', query)
+        r = self._yeti_request('/api/v2/graph/match', query)
 
         results = r.json()
         for result in results['known']:
@@ -67,7 +67,7 @@ class Yetiv2(ThreatIntelligenceModule):
                 tag_list.remove('redirection')
             except ValueError:
                 pass
-            r = self._yeti_request('v2/observables/add_text', { 'text': ioc, 'tags': tag_list})
+            r = self._yeti_request('/api/v2/observables/add_text', { 'text': ioc, 'tags': tag_list})
         except requests.HTTPError as e:
             if e.response.status_code == 400:
                 analysis.log("warning",
@@ -77,7 +77,7 @@ class Yetiv2(ThreatIntelligenceModule):
         else:
             result = r.json()
             obsid = result['id']
-            r = self._yeti_request(f"v2/observables/{obsid}/context",
+            r = self._yeti_request(f"/api/v2/observables/{obsid}/context",
                                    {'context': {'analysis_id': str(analysis['_id'])},
                                    'source': 'FAME' })
 
@@ -85,7 +85,7 @@ class Yetiv2(ThreatIntelligenceModule):
         # Add your API key to the x-yeti-apikey header
         # Write a requests POST call with the api key in the header
         auth = requests.post(
-            self.url + "v2/auth/api-token",
+            self.url + "/api/v2/auth/api-token",
             headers={"x-yeti-apikey": self.api_key},
         )
         
