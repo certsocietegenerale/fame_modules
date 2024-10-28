@@ -20,18 +20,6 @@ class Yetiv2(ThreatIntelligenceModule):
             'description': "URL of your Yeti instance's API endpoint."
         },
         {
-            'name': 'user',
-            'type': 'str',
-            'default': '',
-            'description': "User to use for basic authentication."
-        },
-        {
-            'name': 'password',
-            'type': 'str',
-            'default': '',
-            'description': "Password to use for basic authentication."
-        },
-        {
             'name': 'api_key',
             'type': 'str',
             'default': '',
@@ -94,17 +82,23 @@ class Yetiv2(ThreatIntelligenceModule):
                                    'source': 'FAME' })
 
     def _yeti_request(self, url, data):
+        # Add your API key to the x-yeti-apikey header
+        # Write a requests POST call with the api key in the header
+        auth = requests.post(
+            self.url + "v2/auth/api-token",
+            headers={"x-yeti-apikey": self.api_key},
+        )
+        
+        auth.raise_for_status()
+        access_token = auth.json().get("access_token")
         headers = {'accept': 'application/json'}
-        if self.api_key:
-            headers.update({'x-yeti-apikey': self.api_key})
+        headers.update({"authorization": f"Bearer {access_token}"})
 
-        if self.user == "":
-            r = requests.post(self.url + url,
+        r = requests.post(self.url + url,
                               json=data,
                               headers=headers,
                               timeout=60)
-        else:
-            r = requests.post(self.url + url,
+        r = requests.post(self.url + url,
                               json=data,
                               headers=headers,
                               auth=requests.auth.HTTPBasicAuth(self.user, self.password),
