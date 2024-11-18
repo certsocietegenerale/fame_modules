@@ -87,17 +87,18 @@ class EmailHeader(ProcessingModule):
         try:
             r = dateutil.parser.parse(line, fuzzy=True)
             r = r.astimezone(tz.tzutc())
+            return r
         # if the fuzzy parser failed to parse the line due to
         # incorrect timezone information issue 5 GitHub
-        except ValueError:
-            r = re.findall("^(.*?)\s*\(", line)
-            if r:
-                r = dateutil.parser.parse(r[0])
-            else:
-                r = re.findall('\s*?(.+) UTC', line)
+        except (ValueError, dateutil.parser._parser.ParserError):
+            for regex in ["^(.*?)\s*\(", "\s*?(.+) UTC", "by.+\)\s(.+)"]:
+                r = re.findall(regex, line)
                 if r:
-                    r = dateutil.parser.parse(r[0])
-        return r
+                    try:
+                        r = dateutil.parser.parse(r[0])
+                        return r
+                    except dateutil.parser._parser.ParserError:
+                        pass
 
     # This code is originally from https://github.com/lnxg33k/MHA
     def parse_received(self, received):
@@ -215,7 +216,9 @@ class EmailHeader(ProcessingModule):
         self.results["Cc"] = decode_mime_words(parsed_headers["Cc"])
 
         # Parse Received and Authentication Headers
-        self.results["Received"] = self.parse_received(parsed_headers.get_all("Received"))
+        self.results["Received"] = self.parse_received(
+            parsed_headers.get_all("Received")
+        )
         self.results["DKIM"] = self.parse_dkim(list(parsed_headers.items()))
         self.results["SPF"] = self.parse_spf(list(parsed_headers.items()))
         self.results["DMARC"] = self.parse_dmarc(list(parsed_headers.items()))
