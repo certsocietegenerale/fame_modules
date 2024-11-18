@@ -1,10 +1,14 @@
 import os
 from shutil import copyfile
 
-from fame.core.module import ProcessingModule, ModuleInitializationError
+from fame.core.module import (
+    ProcessingModule,
+    ModuleInitializationError,
+    ModuleExecutionError,
+)
 from fame.common.utils import tempdir
 
-from ..docker_utils import HAVE_DOCKER, docker_client
+from ..docker_utils import HAVE_DOCKER, docker_client, docker
 
 
 class Extract(ProcessingModule):
@@ -55,17 +59,28 @@ class Extract(ProcessingModule):
         self.results["files"] = namelist
 
     def extract(self, file):
-        args = '"{}" {} {}'.format(file, self.maximum_extracted_files, self.maximum_automatic_analyses)
-
-        # start the right docker
-        output = docker_client.containers.run(
-            "fame/extract",
-            args,
-            volumes={self.outdir: {"bind": "/data", "mode": "rw"}},
-            stderr=True,
-            stdout=True,
-            remove=True,
+        args = '"{}" {} {}'.format(
+            file, self.maximum_extracted_files, self.maximum_automatic_analyses
         )
+
+        try:
+            # start the right docker
+            output = docker_client.containers.run(
+                "fame/extract",
+                args,
+                volumes={self.outdir: {"bind": "/data", "mode": "rw"}},
+                stderr=True,
+                stdout=True,
+                remove=True,
+            )
+        except (docker.errors.ContainerError, docker.errors.APIError) as e:
+            if hasattr(e, "stderr"):
+                e = e.stderr
+            elif hasattr(e, "explanation"):
+                e = e.explanation
+            if type(e) is bytes:
+                e = e.decode("utf-8", errors="replace")
+            raise ModuleExecutionError(e)
 
         if type(output) is bytes:
             output = output.decode("utf-8", errors="replace")
@@ -88,10 +103,8 @@ class Extract(ProcessingModule):
 
         copyfile(target, os.path.join(self.outdir, os.path.basename(target)))
         target = os.path.join("/data/", os.path.basename(target))
-        print(target)
         # execute docker container
         output = self.extract(target)
-        print(output)
 
         # save log output from dockerized app, extract potential redirections
         self.save_output(output)
