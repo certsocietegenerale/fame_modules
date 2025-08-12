@@ -13,7 +13,7 @@ def atoi(text):
 
 # Correctly sort pages
 def natural_keys(text):
-    return [atoi(c) for c in re.split('(\d+)', text)]
+    return [atoi(c) for c in re.split(r'(\d+)', text)]
 
 
 class DocumentPreview(ProcessingModule):

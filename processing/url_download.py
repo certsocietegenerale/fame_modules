@@ -1,6 +1,6 @@
 import os
 import requests
-from cgi import parse_header
+from email.message import EmailMessage
 
 from fame.core.module import ProcessingModule
 from fame.common.utils import tempdir, sanitize_filename
@@ -25,11 +25,14 @@ class URLDownload(ProcessingModule):
 
         if response.status_code == 200:
             tmpdir = tempdir()
-            try:
-                filename = parse_header(response.headers['content-disposition'])[1]['filename']
-            except KeyError:
-                filename = target.split('/')[-1]
+            # Recommended way to get filename from headers
+            # https://peps.python.org/pep-0594/#cgi
+            msg = EmailMessage()
+            msg["Content-Disposition"] = response.headers.get("Content-Disposition")
+            filename = msg.get_filename()
 
+            if not filename:
+                filename = target.split('/')[-1]
             if not filename:
                 filename = "no_filename"
 

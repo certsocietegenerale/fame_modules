@@ -91,7 +91,7 @@ class EmailHeader(ProcessingModule):
         # if the fuzzy parser failed to parse the line due to
         # incorrect timezone information issue 5 GitHub
         except (ValueError, dateutil.parser._parser.ParserError):
-            for regex in ["^(.*?)\s*\(", "\s*?(.+) UTC", "by.+\)\s(.+)"]:
+            for regex in [r"^(.*?)\s*\(", r"\s*?(.+) UTC", r"by.+\)\s(.+)"]:
                 r = re.findall(regex, line)
                 if r:
                     try:
@@ -120,7 +120,7 @@ class EmailHeader(ProcessingModule):
 
                 if line[0].startswith("from"):
                     data = re.findall(
-                        """
+                        r"""
                         from\s+
                         (.*?)\s+
                         by(.*?)

@@ -61,7 +61,7 @@ class Z3Core(APKPlugin):
                     continue
                 dll_data = data[symbol['st_value']:symbol['st_value'] + symbol['st_size']]
                 dll_data = gzip.GzipFile(fileobj=BytesIO(dll_data)).read()
-                regexp = """rule find_url {
+                regexp = r"""rule find_url {
                             strings:
                             $url = /http:\/\/[A-Za-z0-9\.\/$\-_+!\*'(),]*/ wide
                             condition:

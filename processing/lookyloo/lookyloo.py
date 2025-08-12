@@ -96,7 +96,7 @@ class Lookyloo(ProcessingModule):
 
         if self.safe_domains is not None:
             for safe_domain in self.safe_domains.split('\n'):
-                if re.match(".*\." + safe_domain.strip().lower() + "$", o.hostname):
+                if re.match(r".*\." + safe_domain.strip().lower() + "$", o.hostname):
                     self.log("info", "You must not analyze this domain. Did you read the documentation?")
                     self.results["redirections"].append(target)
                     self.results["target"] = "You must not analyze this domain. Did you read the documentation?"
