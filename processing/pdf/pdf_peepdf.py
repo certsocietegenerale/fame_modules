@@ -1,12 +1,13 @@
 import os
 import hashlib
 from shutil import rmtree
+from typing import Any
 
 from fame.core.module import ProcessingModule, ModuleInitializationError, ModuleExecutionError
 from fame.common.utils import tempdir
 
 try:
-    import peepdf
+    from peepdf import PDFCore, PDFVulns
     HAVE_PEEPDF = True
 except ImportError:
     HAVE_PEEPDF = False
@@ -27,7 +28,6 @@ def file_sha256(filepath):
             if not data:
                 break
             sha256.update(data)
-
 
 
 def js_beautify_string(string):
@@ -53,7 +53,7 @@ class Peepdf(ProcessingModule):
 
     def initialize(self):
         if not HAVE_PEEPDF:
-            raise ModuleInitializationError(self, "Missing dependency: peepdf")
+            raise ModuleInitializationError(self, "Missing dependency: peepdf-3")
 
     def outdir(self):
         if self._outdir is None:
@@ -76,71 +76,72 @@ class Peepdf(ProcessingModule):
         sha256 = file_sha256(fpath)
         self.results['files'].add(sha256)
 
-    def extract_attachments(self, pdf, obj, version):
-        if not isinstance(obj.object, peepdf.PDFCore.PDFDictionary):
+    def extract_attachments(self, pdf: PDFCore.PDFFile, obj: PDFCore.PDFIndirectObject, version: int) -> None:
+        object = obj.getObject()
+        if not isinstance(object, PDFCore.PDFDictionary):
             return
 
-        if "/F" not in obj.object.elements:
+        if "/F" not in object.elements:
             return
-        if "/EF" not in obj.object.elements:
-            return
-
-        filename = obj.object.elements["/F"]
-        if not isinstance(filename, peepdf.PDFCore.PDFString):
+        if "/EF" not in object.elements:
             return
 
-        ref = obj.object.elements["/EF"]
-        if not isinstance(ref, peepdf.PDFCore.PDFDictionary):
+        filename = object.elements["/F"]
+        if not isinstance(filename, PDFCore.PDFString):
+            return
+
+        ref = object.elements["/EF"]
+        if not isinstance(ref, PDFCore.PDFDictionary):
             return
 
         if "/F" not in ref.elements:
             return
 
         ref = ref.elements["/F"]
-        if not isinstance(ref, peepdf.PDFCore.PDFReference):
+        if not isinstance(ref, PDFCore.PDFReference):
             return
 
-        if ref.id not in pdf.body[version].objects:
+        if ref.getId() not in pdf.body[version].objects:
             return
 
-        obj = pdf.body[version].objects[ref.id]
-        self.extract_file(filename.value, obj.object.decodedStream)
+        obj = pdf.body[version].objects[ref.getId()]
+        self.extract_file(filename.value, obj.getObject().decodedStream)
 
-    def extract_link(self, obj):
+    def extract_link(self, obj: PDFCore.PDFDictionary) -> None:
         if "/URI" in obj.elements:
-            if isinstance(obj.elements['/URI'], peepdf.PDFCore.PDFString):
+            if isinstance(obj.elements['/URI'], PDFCore.PDFString):
                 url = obj.elements['/URI'].value
                 self.add_ioc(url)
                 self.results['urls'].add(url)
 
-    def extract_javascript(self, pdf, obj, version):
+    def extract_javascript(self, pdf: PDFCore.PDFFile, obj: PDFCore.PDFDictionary, version: int) -> None:
         if "/JS" in obj.elements:
             ref = obj.elements["/JS"]
 
-            if isinstance(ref, peepdf.PDFCore.PDFReference):
-                if ref.id not in pdf.body[version].objects:
+            if isinstance(ref, PDFCore.PDFReference):
+                if ref.getId() not in pdf.body[version].objects:
                     return
 
-                js = pdf.body[version].objects[ref.id].object.decodedStream
-            elif isinstance(ref, peepdf.PDFCore.PDFString):
+                js = pdf.body[version].objects[ref.getId()].getObject().decodedStream
+            elif isinstance(ref, PDFCore.PDFString):
                 js = ref.value
 
             self.results['javascript'] += "{}\n\n".format(js_beautify_string(js))
 
-    def walk_objects(self, pdf, obj, version):
-        if isinstance(obj, peepdf.PDFCore.PDFIndirectObject):
-            self.walk_objects(pdf, obj.object, version)
-        elif isinstance(obj, peepdf.PDFCore.PDFDictionary):
+    def walk_objects(self, pdf: PDFCore.PDFFile, obj: object, version: int) -> None:
+        if isinstance(obj, PDFCore.PDFIndirectObject):
+            self.walk_objects(pdf, obj.getObject(), version)
+        elif isinstance(obj, PDFCore.PDFDictionary):
             self.extract_link(obj)
             self.extract_javascript(pdf, obj, version)
 
             for element in list(obj.elements.values()):
                 self.walk_objects(pdf, element, version)
-        elif isinstance(obj, peepdf.PDFCore.PDFArray):
+        elif isinstance(obj, PDFCore.PDFArray):
             for element in obj.elements:
                 self.walk_objects(pdf, element, version)
 
-    def extract_elements(self, pdf):
+    def extract_elements(self, pdf: PDFCore.PDFFile) -> None:
         stats = pdf.getStats()
 
         for version in stats['Versions']:
@@ -149,16 +150,17 @@ class Peepdf(ProcessingModule):
                     for element in version[subtype]:
                         if element in self.results:
                             self.results[element].update(version[subtype][element])
-                        elif element in peepdf.PDFCore.vulnsDict:
+                        elif element in PDFVulns.vulnsDict:
                             self.results['vulns'].append((
                                 element,
-                                version[subtype][element], peepdf.PDFCore.vulnsDict[element][1]
+                                version[subtype][element], PDFVulns.vulnsDict[element][1]
                             ))
 
-    def get_object(self, pdf, object_id):
-        return pdf.getObject(object_id).getValue()
+    def get_object(self, pdf: PDFCore.PDFFile, object_id: int) -> str:
+        object: PDFCore.PDFObject = pdf.getObject(object_id)
+        return object.getValue()
 
-    def extract_objects(self, pdf):
+    def extract_objects(self, pdf: PDFCore.PDFFile) -> None:
         for element_type in [
             '/Names', '/OpenAction', '/AA', '/AcroForm', '/XFA', '/Launch', '/SubmitForm',
             '/ImportData', '/RichMedia', '/Flash'
@@ -170,15 +172,15 @@ class Peepdf(ProcessingModule):
             for object_id in vuln[1]:
                 self.results['objects'][str(object_id)] = self.get_object(pdf, object_id)
 
-    def convert_sets(self):
+    def convert_sets(self) -> None:
         for key in self.results:
             if isinstance(self.results[key], set):
                 self.results[key] = list(self.results[key])
 
-    def each(self, target):
+    def each(self, target: str) -> bool:
         self._outdir = None
 
-        self.results = {
+        self.results: dict[str, Any] = {
             'files': set(),
             'urls': set(),
             'vulns': [],
@@ -198,7 +200,8 @@ class Peepdf(ProcessingModule):
             'objects': {}
         }
         try:
-            result, pdf = peepdf.PDFCore.PDFParser().parse(
+            pdf: PDFCore.PDFFile
+            result, pdf = PDFCore.PDFParser().parse(
                 target,
                 forceMode=True,
                 looseMode=True
@@ -210,7 +213,9 @@ class Peepdf(ProcessingModule):
             raise ModuleExecutionError('error during PDF parsing: {}'.format(result))
 
         for version in range(pdf.updates + 1):
-            for obj in list(pdf.body[version].objects.values()):
+            body: PDFCore.PDFBody = pdf.body[version]
+            obj: PDFCore.PDFIndirectObject
+            for obj in list(body.objects.values()):
                 self.extract_attachments(pdf, obj, version)
                 self.walk_objects(pdf, obj, version)
 

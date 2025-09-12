@@ -1,1 +1,2 @@
-peepdf==0.4.2
+peepdf-3==5.1.1
+pillow>=9.0.0
