@@ -11,6 +11,11 @@ try:
     HAVE_PEEPDF = True
 except ImportError:
     HAVE_PEEPDF = False
+    class PDFCore:
+        # declare a fake class
+        # To prevent errors when peepdf is missing
+        PDFFile = PDFIndirectObject = PDFDictionary = None
+        
 
 try:
     from jsbeautifier import beautify
