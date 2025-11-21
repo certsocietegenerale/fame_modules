@@ -17,7 +17,7 @@ def str_reverse(match):
 class OfficeMacros(ProcessingModule):
     name = "office_macros"
     description = "Extract and analyze Office macros."
-    acts_on = ["word", "html", "excel", "powerpoint"]
+    acts_on = ["word", "html", "excel", "powerpoint", "svg"]
 
     def initialize(self):
         if not HAVE_OLETOOLS:
