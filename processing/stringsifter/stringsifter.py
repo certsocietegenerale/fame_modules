@@ -1,7 +1,6 @@
-from subprocess import Popen, PIPE
-from shutil import which
-from fame.core.module import ProcessingModule
-from fame.common.exceptions import ModuleInitializationError
+from fame.core.module import ProcessingModule, ModuleInitializationError
+from ..docker_utils import HAVE_DOCKER, docker_client, docker
+import re
 
 
 class StringSifter(ProcessingModule):
@@ -13,51 +12,53 @@ class StringSifter(ProcessingModule):
             "name": "min_len",
             "type": "integer",
             "default": 4,
-            "description": "Show strings that are at least min_len characters long (default: 4)."
+            "description": "Show strings that are at least min_len characters long (default: 4).",
         },
         {
             "name": "show_scores",
             "type": "bool",
             "default": False,
-            "description": "Display rank scores within output (default: scores not displayed)."
+            "description": "Display rank scores within output (default: scores not displayed).",
         },
         {
             "name": "limit",
             "type": "integer",
             "default": None,
-            "description": "Limit output to the top `limit` ranked strings (default: no limit)."
-        }
+            "description": "Limit output to the top `limit` ranked strings (default: no limit).",
+        },
     ]
 
     def initialize(self):
-        if which("flarestrings") is None:
-            raise ModuleInitializationError(self, "Missing dependency: flarestrings")
-        if which("rank_strings") is None:
-            raise ModuleInitializationError(self, "Missing dependency: rank_strings")
+        if not HAVE_DOCKER:
+            raise ModuleInitializationError(self, "Missing dependency: docker")
 
         return True
 
-    def each(self, target):
-        flarestrings_cmd = ("flarestrings", "-n", str(self.min_len), target)
-        rank_strings_cmd = ["rank_strings"]
+    def parse_output(self, out):
+        out = out.decode("utf-8", errors="replace")
+        self.results = {"strings": [o.strip() for o in out.splitlines() if o.strip()]}
 
-        if self.show_scores:
-            rank_strings_cmd.append("--scores")
-        if self.limit is not None:
-            rank_strings_cmd += ("--limit", str(self.limit))
-
-        flarestrings_process = Popen(flarestrings_cmd, stdout=PIPE)
-        rank_strings_process = Popen(rank_strings_cmd,
-                                     stdin=flarestrings_process.stdout,
-                                     stdout=PIPE)
-        flarestrings_process.stdout.close()
-        rank_strings_output = rank_strings_process.communicate()[0]
-
-        if rank_strings_process.returncode != 0:
-            return False
-
-        self.results = {
-            "strings": rank_strings_output.decode("utf-8").rstrip("\n").split("\n")
-        }
+    def each_with_type(self, target, file_type):
+        if file_type != "url":
+            try:
+                self.parse_output(
+                    docker_client.containers.run(
+                        "fame/stringsifter",
+                        "target.file",
+                        volumes={target: {"bind": "/data/target.file", "mode": "ro"}},
+                        environment={
+                            "min_len": int(self.min_len),
+                            "limit": int(self.limit or 0),
+                            "show_scores": bool(self.show_scores),
+                        },
+                        stderr=True,
+                        remove=True,
+                    )
+                )
+            except (docker.errors.ContainerError, docker.errors.APIError) as e:
+                if hasattr(e, "stderr"):
+                    self.log("error", e.stderr)
+                elif hasattr(e, "explanation"):
+                    self.log("error", e.explanation)
 
         return len(self.results["strings"]) > 0
