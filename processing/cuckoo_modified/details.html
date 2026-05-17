@@ -8,11 +8,11 @@
             <label>Score</label>
             {% if results.score %}
                 {% if results.score | float > 6.0 %}
-                    <h2 style="margin: 0 0 15px; 0"><span class="label label-danger">{{results.score}}</span></h2>
+                    <h2 style="margin: 0 0 15px; 0"><span class="badge bg-danger">{{results.score}}</span></h2>
                 {% elif results.score | float > 2.0 %}
-                    <h2 style="margin: 0 0 15px; 0"><span class="label label-warning">{{results.score}}</span></h2>
+                    <h2 style="margin: 0 0 15px; 0"><span class="badge bg-warning">{{results.score}}</span></h2>
                 {% else %}
-                    <h2 style="margin: 0 0 15px; 0"><span class="label label-success">{{results.score}}</span></h2>
+                    <h2 style="margin: 0 0 15px; 0"><span class="badge bg-success">{{results.score}}</span></h2>
                 {% endif %}
             {% endif %}
             {% if results.classification %}

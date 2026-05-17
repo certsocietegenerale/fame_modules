@@ -8,11 +8,11 @@
             <label>Score</label>
             {% if results.analysis.score %}
                 {% if results.analysis.score > 6.0 %}
-                    <h2 style="margin: 0 0 15px; 0"><span class="label label-danger">{{results.analysis.score}}</span></h2>
+                    <h2 style="margin: 0 0 15px; 0"><span class="badge bg-danger">{{results.analysis.score}}</span></h2>
                 {% elif results.analysis.score > 2.0 %}
-                    <h2 style="margin: 0 0 15px; 0"><span class="label label-warning">{{results.analysis.score}}</span></h2>
+                    <h2 style="margin: 0 0 15px; 0"><span class="badge bg-warning">{{results.analysis.score}}</span></h2>
                 {% else %}
-                    <h2 style="margin: 0 0 15px; 0"><span class="label label-success">{{results.analysis.score}}</span></h2>
+                    <h2 style="margin: 0 0 15px; 0"><span class="badge bg-success">{{results.analysis.score}}</span></h2>
                 {% endif %}
             {% endif %}
 

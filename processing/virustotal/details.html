@@ -9,11 +9,11 @@
             <label>Score</label>
             {% if 'positives' in results %}
                 {% if results['positives'] > 9 %}
-                    <h2 style="margin: 0 0 15px; 0"><span class="label label-danger">{{results['positives']}} / {{results['total']}}</span></h2>
+                    <h2 style="margin: 0 0 15px; 0"><span class="badge bg-danger">{{results['positives']}} / {{results['total']}}</span></h2>
                 {% elif results['positives'] > 0 %}
-                    <h2 style="margin: 0 0 15px; 0"><span class="label label-warning">{{results['positives']}} / {{results['total']}}</span></h2>
+                    <h2 style="margin: 0 0 15px; 0"><span class="badge bg-warning">{{results['positives']}} / {{results['total']}}</span></h2>
                 {% else %}
-                    <h2 style="margin: 0 0 15px; 0"><span class="label label-success">{{results['positives']}} / {{results['total']}}</span></h2>
+                    <h2 style="margin: 0 0 15px; 0"><span class="badge bg-success">{{results['positives']}} / {{results['total']}}</span></h2>
                 {% endif %}
             {% endif %}
             <label>Scan Date</label>

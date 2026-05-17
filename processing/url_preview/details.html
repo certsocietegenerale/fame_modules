@@ -30,15 +30,15 @@
   }
 
   /* The Close Button */
-  .close {
+  .modal-close-btn {
       color: #aaa;
       float: right;
       font-size: 28px;
       font-weight: bold;
   }
 
-  .close:hover,
-  .close:focus {
+  .modal-close-btn:hover,
+  .modal-close-btn:focus {
       color: black;
       text-decoration: none;
       cursor: pointer;
@@ -70,7 +70,7 @@
             {% if 'support_files' in analysis %}
                 {% if name in analysis.support_files %}
                     {% for support_file in analysis.support_files[name] %}
-                        <a href="#" ><img class="col-md-8" onclick=showImage(this) src={{url_for('AnalysesView:download_support_file', id=analysis._id, module=name, filename=support_file[1])}} class="img-thumbnail"></a>
+                        <a href="#" ><img class="col-md-8 img-thumbnail" onclick=showImage(this) src={{url_for('AnalysesView:download_support_file', id=analysis._id, module=name, filename=support_file[1])}}></a>
                     {% endfor %}
                 {% endif %}
             {% endif %}
@@ -82,7 +82,7 @@
 <div id="ModalImage" class="modal">
   <!-- Modal content -->
   <div class="modal-content">
-      <span id="closeModal" class="close">&times;</span>
+      <span id="closeModal" class="modal-close-btn">&times;</span>
       <img class="modal-content-image" id='ModalContent'>
   </div>
 </div>
