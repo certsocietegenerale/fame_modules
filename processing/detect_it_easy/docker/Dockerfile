@@ -1,7 +1,5 @@
-FROM debian:bullseye-slim
+FROM debian:trixie-slim
 
-RUN apt-get update -qq && apt-get upgrade -y && apt-get install -y wget tar libglib2.0-0 && \
-    wget https://github.com/horsicq/DIE-engine/releases/download/3.01/die_lin64_portable_3.01.tar.gz && \
-    tar -xzf die_lin64_portable_3.01.tar.gz
+RUN apt update && apt upgrade -y && apt install -y wget &&  wget https://github.com/horsicq/DIE-engine/releases/download/3.21/die_3.21_Debian_13_amd64.deb && apt install /die_3.21_Debian_13_amd64.deb -y && rm die_3.21_Debian_13_amd64.deb
 
-ENTRYPOINT ["/die_lin64_portable/diec.sh"]
+ENTRYPOINT ["/usr/bin/diec"]
