@@ -19,7 +19,7 @@ class DetectItEasy(ProcessingModule):
             self.parse_output(
                 docker_client.containers.run(
                     "fame/diec",
-                    "/data/target.file",
+                    "/data/target.file --plaintext",
                     volumes={target: {"bind": "/data/target.file", "mode": "ro"}},
                     stderr=True,
                     remove=True,
@@ -39,7 +39,6 @@ class DetectItEasy(ProcessingModule):
             parts = line.split(":")
             name = parts[0].strip()
             value = ":".join(parts[1:]).strip()
-
             # Warnings should be in the logs
             if name == "Warning":
                 self.log("warning", value)
@@ -47,7 +46,7 @@ class DetectItEasy(ProcessingModule):
             elif name == "Error":
                 self.log("error", value)
             # Filter every attribute in the exclusion list
-            else:
+            elif name and value:
                 self.results.append((name, value))
 
     def each_with_type(self, target, file_type):
